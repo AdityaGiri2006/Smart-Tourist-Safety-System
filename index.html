@@ -73,6 +73,7 @@ const SMARTTOUR_FIREBASE_CONFIG={
   appId:'1:15163859587:web:6156b618092a655c5071b6'
 };
 let fb={ready:false,db:null,auth:null,api:null,unsubs:[]}, backendMode='local';
+let firebaseInitPromise=null;
 function firebaseConfigured(){return SMARTTOUR_FIREBASE_CONFIG.apiKey&&!SMARTTOUR_FIREBASE_CONFIG.apiKey.startsWith('PASTE_')&&SMARTTOUR_FIREBASE_CONFIG.databaseURL&&!SMARTTOUR_FIREBASE_CONFIG.databaseURL.includes('PASTE_')}
 async function initFirebaseBackend(){
   if(!firebaseConfigured()){backendMode='local';setLivePill('SETUP FIREBASE');return false}
@@ -92,6 +93,11 @@ async function initFirebaseBackend(){
     watch('teams',v=>{teams=v?Object.values(v):[];save('st_teams',teams);if(page==='rescue'||page==='dashboard')refreshCurrentPage()});
     return true;
   }catch(e){console.error('Firebase init failed',e);backendMode='local';setLivePill('FIREBASE ERROR');return false}
+}
+async function waitForFirebase(timeoutMs=12000){
+  if(fb.ready)return true;
+  if(firebaseInitPromise){try{await Promise.race([firebaseInitPromise,new Promise(r=>setTimeout(()=>r(false),timeoutMs))]);}catch(e){}}
+  return fb.ready;
 }
 function safeKey(x){return String(x).replace(/[.#$\[\]\/]/g,'_')}
 async function cloudSet(path,value){if(!fb.ready)return false;try{await fb.api.set(fb.api.ref(fb.db,path),value);return true}catch(e){console.error(e);return false}}
@@ -466,9 +472,10 @@ function exitTouristMode(){
   location.href=u.toString();
 }
 
-function startTouristClient(){
+async function startTouristClient(){
   const room=$('#roomCode')?.value.trim().toUpperCase();
   closeModal(); document.body.classList.add('tourist-mode');
+  await waitForFirebase(12000);
   if(fb.ready){
     liveRole='tourist'; liveRoomReady=true; setLivePill('FIREBASE CONNECTED');
     if(!window.touristLiveId)window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));
@@ -538,18 +545,27 @@ function deleteMyTouristEntry(id){
 }
 /* Override GPS so admin/local and tourist/live-room modes share one real browser GPS path. */
 async function startSpecificGPS(id,force=false){
-  if(liveRole==='admin' && !document.body.classList.contains('tourist-mode')){const t0=tourists.find(x=>x.id===id);if(t0?.lat!=null){toast('Showing latest location received from tourist phone');if(page==='map'&&map)showGpsOnMap(t0.lat,t0.lon)}else toast('No GPS received yet. Ask the tourist to open Tourist Mode and allow Location.');return}
+  if(liveRole==='admin' && !document.body.classList.contains('tourist-mode')){
+    const t0=tourists.find(x=>x.id===id);
+    if(t0?.lat!=null){toast('Showing latest location received from tourist phone');if(page==='map'&&map)showGpsOnMap(t0.lat,t0.lon)}
+    else toast('No GPS received yet. Ask the tourist to open Tourist Mode and allow Location.');
+    return;
+  }
   let t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
   if(!t){toast('Tourist record not found');return}
   if(!t.consent){toast('Location consent is required');return}
-  if(!navigator.geolocation){setGpsBanner('This phone/browser does not provide GPS location');toast('GPS is not supported by this browser');return}
-  if(!window.isSecureContext){setGpsBanner('GPS needs HTTPS');toast('Open the GitHub Pages HTTPS link in Chrome/Safari');return}
-  if(watchId!==null)navigator.geolocation.clearWatch(watchId);
-  trackingId=id;setGpsBanner('Requesting phone location…');
+  if(!navigator.geolocation){setGpsBanner('Location is not supported by this browser');toast('This browser does not support device location');return}
+  if(!window.isSecureContext){setGpsBanner('GPS needs HTTPS');toast('Open the HTTPS GitHub Pages link in Chrome/Safari');return}
+  if(watchId!==null){try{navigator.geolocation.clearWatch(watchId)}catch(e){}watchId=null}
+  trackingId=id;
+  setGpsBanner('Requesting your phone location…');
+
+  let firstFix=false;
   const handlePosition=async p=>{
     let x=tourists.find(z=>z.id===id)||window.touristLiveRecord;if(!x)return;
     const c=p.coords;
     if(!Number.isFinite(c.latitude)||!Number.isFinite(c.longitude)){setGpsBanner('Phone returned an invalid location');return}
+    firstFix=true;
     x.lat=c.latitude;x.lon=c.longitude;x.accuracy=c.accuracy;x.speed=c.speed;x.heading=c.heading;x.lastSeen=Date.now();x.live=true;
     if(window.touristLiveRecord)Object.assign(window.touristLiveRecord,x);
     save('st_tourists',tourists);lastGps={lat:c.latitude,lon:c.longitude,time:Date.now()};
@@ -561,14 +577,22 @@ async function startSpecificGPS(id,force=false){
     if(page==='map')showGpsOnMap(c.latitude,c.longitude);
   };
   const handleError=e=>{
-    const msg=gpsStatusText(e);
+    const code=e?.code;
+    let msg=code===1?'Location permission is blocked. Allow Location for this site and tap Retry GPS.':code===2?'Phone could not get a precise GPS fix yet. Trying network location…':code===3?'GPS is taking too long. Trying network location…':'Could not get device location. Tap Retry GPS.';
     setGpsBanner(msg);
-    const st=$('#touristLiveStatus');if(st)st.innerHTML=`<b class="warnText">⚠ GPS needs attention</b><p class="note">${esc(msg)}</p><p class="note">On Android: Settings → Location ON → Chrome → Site settings → Location → Allow. Then tap Retry GPS.</p>`;
-    const pb=$('#gpsPermissionBadge');if(pb){pb.textContent=e?.code===1?'LOCATION BLOCKED':'GPS RETRY';pb.className='badge high'}
+    const st=$('#touristLiveStatus');if(st)st.innerHTML=`<b class="warnText">⚠ GPS needs attention</b><p class="note">${esc(msg)}</p><p class="note"><b>Android:</b> Settings → Location ON → Chrome → Site settings → Location → Allow. Then tap Retry GPS.</p>`;
+    const pb=$('#gpsPermissionBadge');if(pb){pb.textContent=code===1?'LOCATION BLOCKED':'GPS RETRY';pb.className='badge high'}
+    // A second, less strict request helps phones whose high-accuracy GPS is slow/indoors.
+    if(!firstFix && code!==1){
+      setTimeout(()=>{
+        navigator.geolocation.getCurrentPosition(handlePosition,()=>{}, {enableHighAccuracy:false,timeout:60000,maximumAge:30000});
+      },250);
+    }
   };
-  // First request a one-time real GPS fix. This gives mobile browsers an immediate permission/user-facing prompt.
-  navigator.geolocation.getCurrentPosition(handlePosition,handleError,{enableHighAccuracy:true,timeout:20000,maximumAge:0});
-  watchId=navigator.geolocation.watchPosition(handlePosition,handleError,{enableHighAccuracy:true,maximumAge:5000,timeout:30000});
+
+  // Permission/fix request is triggered directly by the tourist's button click.
+  navigator.geolocation.getCurrentPosition(handlePosition,handleError,{enableHighAccuracy:true,timeout:25000,maximumAge:0});
+  watchId=navigator.geolocation.watchPosition(handlePosition,handleError,{enableHighAccuracy:true,maximumAge:10000,timeout:60000});
   audit('TRACKING_STARTED','tourist',id,'Real device GPS watch started');
   toast('Requesting your phone location… tap Allow if prompted');
   updateTouristPermissionBadge();
@@ -595,7 +619,7 @@ function settingsPage(){
   const configured=firebaseConfigured();
   $('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Production Data Backend</h3><small>Firebase Realtime Database + anonymous authentication</small></div>${badge(fb.ready?'live':configured?'configured':'setup required')}</div><div class="pad"><div class="liveTrack"><b>${fb.ready?'🟢 Firebase connected':'⚠ Firebase setup required'}</b><p class="note">For true cross-device storage, replace SMARTTOUR_FIREBASE_CONFIG in this HTML with your Firebase web-app config, enable Realtime Database and Anonymous Authentication, then deploy this same file over HTTPS (for example GitHub Pages / Firebase Hosting).</p><p class="note">Backend mode: ${esc(backendMode)}. WebRTC remains a fast live fallback, but admin entries and tourist GPS are persisted to Firebase when configured.</p></div></div></div><div class="panel"><div class="head"><h3>Real data sources</h3></div><div class="pad note"><p><b>GPS:</b> browser Geolocation API with explicit tourist permission; HTTPS required on phones.</p><p><b>Facilities:</b> live OpenStreetMap / Overpass data near exact GPS.</p><p><b>Weather:</b> live Open-Meteo data for coordinates.</p><p><b>Emergency:</b> 112 uses the phone dialer. Official police/ambulance dispatch APIs require government authorization.</p><p><b>Background limitation:</b> normal mobile browsers may suspend GPS when screen locks or page is closed. Continuous closed-app tracking requires a native app or installed PWA with platform-specific background-location support.</p></div></div>`;
 }
-async function init(){navRender();await initFirebaseBackend();$$('[data-page]').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.page);$('#shell').classList.remove('navopen');$('#shade').style.display='none'}));$('#menu').onclick=()=>{$('#shell').classList.add('navopen');$('#shade').style.display='block'};$('#shade').onclick=()=>{$('#shell').classList.remove('navopen');$('#shade').style.display='none'};$('#modalShade').onclick=e=>{if(e.target.id==='modalShade')closeModal()};const qs=new URLSearchParams(location.search);const isTourist=qs.has('tourist');if(isTourist){liveRole='tourist';document.body.classList.add('tourist-mode');await go('dashboard');openTouristMode()}else{initLiveAdmin();await go('dashboard')}}
+async function init(){navRender();firebaseInitPromise=initFirebaseBackend();await firebaseInitPromise;$$('[data-page]').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.page);$('#shell').classList.remove('navopen');$('#shade').style.display='none'}));$('#menu').onclick=()=>{$('#shell').classList.add('navopen');$('#shade').style.display='block'};$('#shade').onclick=()=>{$('#shell').classList.remove('navopen');$('#shade').style.display='none'};$('#modalShade').onclick=e=>{if(e.target.id==='modalShade')closeModal()};const qs=new URLSearchParams(location.search);const isTourist=qs.has('tourist');if(isTourist){liveRole='tourist';document.body.classList.add('tourist-mode');await go('dashboard');openTouristMode()}else{initLiveAdmin();await go('dashboard')}}
 window.addEventListener('beforeunload',()=>{if(watchId!==null)navigator.geolocation?.clearWatch(watchId)});init();
 </script>
 </body>
