@@ -451,10 +451,9 @@ function renderLiveRoomStatus(){
 }
 function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Copied')).catch(()=>toast('Copy failed — long press and copy'))}
 function openTouristMode(){
-  const room=new URLSearchParams(location.search).get('tourist')||'';
   document.body.classList.add('tourist-mode');
-  openModal(`<div class="head"><div><h3>📍 Tourist Safety Mode</h3><small>Use this phone as your live safety tracker</small></div><button class="btn" onclick="exitTouristMode()">← Back</button></div><div class="pad fields"><div class="field span2"><label>Control room code <span class="muted">(only needed if Firebase is not configured)</span></label><input id="roomCode" value="${esc(room==='firebase'?'':room)}" placeholder="e.g. ST-7K2P9Q" autocomplete="off" autocapitalize="characters" spellcheck="false"></div><div class="field span2"><div class="consent note"><b>Mobile GPS:</b> Your phone's real GPS will be shared only after you give consent and allow Location. Keep this page open while travelling.</div></div></div><div class="modalFoot"><button class="btn primary" onclick="startTouristClient()">Connect This Phone</button></div>`);
-  setTimeout(()=>$('#roomCode')?.focus(),100);
+  closeModal();
+  startTouristClient();
 }
 
 function exitTouristMode(){
@@ -473,28 +472,32 @@ function exitTouristMode(){
 }
 
 async function startTouristClient(){
-  const room=$('#roomCode')?.value.trim().toUpperCase();
-  closeModal(); document.body.classList.add('tourist-mode');
+  document.body.classList.add('tourist-mode');
   await waitForFirebase(12000);
-  if(fb.ready){
-    liveRole='tourist'; liveRoomReady=true; setLivePill('FIREBASE CONNECTED');
-    if(!window.touristLiveId)window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));
-    renderTouristClient(window.touristLiveId); return;
-  }
-  if(!room){toast('Firebase is not configured. Enter the admin live room code.');openTouristMode();return}
-  if(!/^ST-[A-Z0-9]{4,12}$/.test(room)){toast('Room code should look like ST-7K2P9Q');openTouristMode();return}
-  connectTouristToRoom(room);
+  liveRole='tourist';
+  liveRoomReady=!!fb.ready;
+  setLivePill(fb.ready?'FIREBASE CONNECTED':'GPS READY');
+  if(!window.touristLiveId)window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));
+  renderTouristClient(window.touristLiveId);
 }
 
 function renderTouristClient(id){
   const existing=window.touristLiveRecord||{};
-  $('#app').innerHTML=`<section class="panel"><div class="head"><div><h3>📍 Tourist Safety Registration</h3><small>Live tracking from this phone</small></div><div class="toolbar"><span class="badge safe">CONNECTED</span><button class="btn" onclick="exitTouristMode()">← Back</button></div></div><div class="pad fields"><div class="field span2"><label>Full name</label><input id="tcName" value="${esc(existing.name||'')}" placeholder="Your full name" autocomplete="name"></div><div class="field"><label>Mobile number</label><input id="tcPhone" value="${esc(existing.phone||'')}" placeholder="+91 …" inputmode="tel" autocomplete="tel"></div><div class="field"><label>Nationality</label><input id="tcNat" value="${esc(existing.nationality||'Indian')}" placeholder="Indian" autocomplete="country-name"></div><div class="field span2"><label>Destination</label>${destSelect('tcDest',existing.destination_id||'gwalior')}</div><div class="field span2"><label><input id="tcConsent" type="checkbox" style="width:auto"> I consent to share my device location with the SmartTour control room for safety.</label></div></div><div class="modalFoot"><button class="btn primary" onclick="registerTouristClient('${jsq(id)}')">📍 Register & Start GPS</button></div></section><section class="panel"><div class="head"><h3>Live GPS Status</h3><span id="gpsPermissionBadge" class="badge">CHECKING</span></div><div class="pad"><div id="touristLiveStatus" class="liveTrack"><b>Ready to start</b><p class="note">Tap Register & Start GPS, then tap Allow when your browser asks for Location.</p></div><div class="toolbar" style="margin-top:10px"><button class="btn" onclick="retryTouristGPS('${jsq(id)}')">📍 Retry GPS</button><button class="btn" onclick="sendTouristPing()">Test Connection</button><button class="btn primary" onclick="touristNearbyHelp()">🏥 Nearby Help</button><button class="btn" onclick="touristSafetyWeather()">☁ Live Weather & Safety</button></div><div id="touristSafetyOut" class="note" style="margin-top:10px"></div></div></section><section class="panel"><div class="head"><h3>Emergency & Privacy</h3></div><div class="pad actionGrid"><a class="btn danger call" href="tel:112">☎ Call 112</a><button class="btn danger" onclick="touristSOS('${jsq(id)}')">⚠ SEND SOS</button><button class="btn" onclick="stopTracking()">Stop GPS</button><button class="btn danger" onclick="deleteMyTouristEntry('${jsq(id)}')">🗑 Delete My Entry</button></div><p class="note" style="margin:10px 14px 14px">Delete My Entry removes this tourist registration from this device and asks the connected control room to remove the same entry. It also stops this page's GPS watch.</p></section>`;
+  $('#app').innerHTML=`<section class="panel"><div class="head"><div><h3>📍 Tourist Safety Registration</h3><small>Live tracking from this phone</small></div><div class="toolbar"><span class="badge safe">CONNECTED</span><button class="btn" onclick="exitTouristMode()">← Back</button></div></div><div class="pad fields"><div class="field span2"><label>Full name</label><input id="tcName" value="${esc(existing.name||'')}" placeholder="Your full name" autocomplete="name"></div><div class="field"><label>Mobile number</label><input id="tcPhone" value="${esc(existing.phone||'')}" placeholder="+91 …" inputmode="tel" autocomplete="tel"></div><div class="field"><label>Nationality</label><input id="tcNat" value="${esc(existing.nationality||'Indian')}" placeholder="Indian" autocomplete="country-name"></div><div class="field span2"><label>Destination</label>${destSelect('tcDest',existing.destination_id||'gwalior')}</div><div class="field span2"><label><input id="tcConsent" type="checkbox" style="width:auto"> I consent to share my device location with the SmartTour control room for safety.</label></div></div><div class="modalFoot"><button class="btn primary" onclick="registerTouristClient('${jsq(id)}')">📍 Register & Start GPS</button></div></section><section class="panel"><div class="head"><h3>Live GPS Status</h3><span id="gpsPermissionBadge" class="badge">CHECKING</span></div><div class="pad"><div id="touristLiveStatus" class="liveTrack"><b>Ready to start</b><p class="note">Tap Register & Start GPS. Your phone should immediately ask for Location permission — tap Allow.</p></div><div class="toolbar" style="margin-top:10px"><button class="btn primary" onclick="requestTouristLocation('${jsq(id)}')">📍 Enable Location</button><button class="btn" onclick="retryTouristGPS('${jsq(id)}')">Retry GPS</button><button class="btn" onclick="sendTouristPing()">Test Connection</button><button class="btn primary" onclick="touristNearbyHelp()">🏥 Nearby Help</button><button class="btn" onclick="touristSafetyWeather()">☁ Live Weather & Safety</button></div><div id="touristSafetyOut" class="note" style="margin-top:10px"></div></div></section><section class="panel"><div class="head"><h3>Emergency & Privacy</h3></div><div class="pad actionGrid"><a class="btn danger call" href="tel:112">☎ Call 112</a><button class="btn danger" onclick="touristSOS('${jsq(id)}')">⚠ SEND SOS</button><button class="btn" onclick="stopTracking()">Stop GPS</button><button class="btn danger" onclick="deleteMyTouristEntry('${jsq(id)}')">🗑 Delete My Entry</button></div><p class="note" style="margin:10px 14px 14px">Delete My Entry removes this tourist registration from this device and asks the connected control room to remove the same entry. It also stops this page's GPS watch.</p></section>`;
   updateTouristPermissionBadge();
 }
 async function updateTouristPermissionBadge(){
   const el=$('#gpsPermissionBadge'); if(!el)return;
   try{if(navigator.permissions?.query){const p=await navigator.permissions.query({name:'geolocation'});el.textContent=p.state==='granted'?'LOCATION ALLOWED':p.state==='denied'?'LOCATION BLOCKED':'LOCATION READY';el.className='badge '+(p.state==='granted'?'safe':p.state==='denied'?'high':'medium');p.onchange=()=>updateTouristPermissionBadge();return;}}catch(e){}
   el.textContent=navigator.geolocation?'LOCATION READY':'GPS NOT SUPPORTED';el.className='badge '+(navigator.geolocation?'medium':'high');
+}
+function requestTouristLocation(id){
+  const box=$('#tcConsent');
+  if(box && !box.checked){box.checked=true;}
+  const t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
+  if(!t){toast('Register first');return}
+  t.consent=true;
+  startSpecificGPS(id,true);
 }
 function retryTouristGPS(id){
   const t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
@@ -508,12 +511,18 @@ function registerTouristClient(id){
   const name=$('#tcName').value.trim(),phone=$('#tcPhone').value.trim(),consent=$('#tcConsent').checked;
   if(!name||!phone){toast('Please enter your name and mobile number');return}
   if(!consent){toast('Location consent is required');return}
-  if(!fb.ready&&!window.liveAdminConn?.open){toast('Control room is not connected yet.');return}
+  if(!navigator.geolocation){toast('This phone/browser does not support Location');return}
+  if(!window.isSecureContext){toast('Location needs HTTPS. Open the GitHub Pages HTTPS link.');return}
+
+  // IMPORTANT: keep this location request in the same user-click flow as registration.
+  // This is what allows the phone browser to show its native Location permission prompt.
   const t={id,name,phone,nationality:$('#tcNat').value.trim()||'Indian',destination_id:$('#tcDest').value,consent:true,status:'safe',lat:null,lon:null,lastSeen:null,createdAt:Date.now(),live:true};
   window.touristLiveRecord=t; window.touristRegisteredAck=false;
-  tourists=tourists.filter(x=>x.id!==id); tourists.unshift(t); save('st_tourists',tourists); audit('REGISTER','tourist',id,`${name} · live room`);
+  tourists=tourists.filter(x=>x.id!==id); tourists.unshift(t); save('st_tourists',tourists); audit('REGISTER','tourist',id,`${name} · live tracking`);
+  renderTouristClient(id);
+  // Start the real device GPS immediately after the user's Register click.
+  startSpecificGPS(id,true);
   cloudSet('tourists/'+safeKey(id),t);if(window.liveAdminConn?.open){sendTouristRegistration(); startTouristRegisterRetry();}
-  renderTouristClient(id); startSpecificGPS(id);
 }
 async function uploadLiveGPS(id,c){
   const g={lat:c.latitude,lon:c.longitude,accuracy:c.accuracy,speed:c.speed,heading:c.heading,time:Date.now()};
@@ -578,7 +587,7 @@ async function startSpecificGPS(id,force=false){
   };
   const handleError=e=>{
     const code=e?.code;
-    let msg=code===1?'Location permission is blocked. Allow Location for this site and tap Retry GPS.':code===2?'Phone could not get a precise GPS fix yet. Trying network location…':code===3?'GPS is taking too long. Trying network location…':'Could not get device location. Tap Retry GPS.';
+    let msg=code===1?'Location permission is blocked. Open Chrome → Site settings → Location → Allow, then tap Retry GPS.':code===2?'Phone could not get a precise GPS fix yet. Trying network location…':code===3?'GPS is taking too long. Trying network location…':'Could not get device location. Tap Retry GPS.';
     setGpsBanner(msg);
     const st=$('#touristLiveStatus');if(st)st.innerHTML=`<b class="warnText">⚠ GPS needs attention</b><p class="note">${esc(msg)}</p><p class="note"><b>Android:</b> Settings → Location ON → Chrome → Site settings → Location → Allow. Then tap Retry GPS.</p>`;
     const pb=$('#gpsPermissionBadge');if(pb){pb.textContent=code===1?'LOCATION BLOCKED':'GPS RETRY';pb.className='badge high'}
