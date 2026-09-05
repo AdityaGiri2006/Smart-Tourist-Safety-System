@@ -145,8 +145,8 @@ function dashboardPage(){let active=alerts.filter(a=>a.status!=='resolved').leng
 function baseMap(id){if(!window.L)return null;let m=L.map(id,{zoomControl:true,preferCanvas:true}).setView([22.9734,78.6569],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(m);return m}
 function clearMarkers(){mapMarkers.forEach(x=>{try{x.remove()}catch(e){}});mapMarkers=[]}
 function marker(m,lat,lon,text){let x=L.marker([lat,lon]).addTo(m).bindPopup(text);mapMarkers.push(x);return x}
-function buildMap(id,small=false){if(!window.L)return;let m=baseMap(id);if(!m)return;if(!small){map=m;window._liveTouristMarkers=new Map()}let colors={tourist:'#22c7ad',sos:'#ff5c68',team:'#7fb0ff',dest:'#f7c55d'};destinations.forEach(d=>{let c=L.circleMarker([d.lat,d.lon],{radius:5,color:colors.dest,fillColor:colors.dest,fillOpacity:.7}).addTo(m).bindPopup(`<b>${esc(d.name)}</b><br>Risk index: ${d.risk}`);mapMarkers.push(c)});tourists.forEach(t=>{if(t.lat==null||t.lon==null)return;let c=t.status==='sos'?colors.sos:colors.tourist;let mk=marker(m,t.lat,t.lon,`<b>${esc(t.name)}</b><br>${esc(t.id)}<br>Status: ${esc(t.status)}<br>Last GPS: ${ago(t.lastSeen)}<br><button onclick="startSpecificGPS('${jsq(t.id)}')">Track this tourist</button>`);if(!small&&window._liveTouristMarkers)window._liveTouristMarkers.set('tourist:'+t.id,mk)});teams.forEach(t=>{marker(m,t.lat,t.lon,`<b>${esc(t.name)}</b><br>${esc(t.status)}<br>${esc(t.base)}`)});alerts.filter(a=>a.status!=='resolved').forEach(a=>{let t=tourists.find(x=>x.id===a.tourist_id);if(t?.lat!=null)marker(m,t.lat,t.lon,`<b>SOS / Alert #${a.id}</b><br>${esc(t.name)}<br>${esc(a.message)}`)});return m}
-function mapPage(){stopTrackingIfLeavingMap(false);$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Live India Map</h3><small>Zoom, pan, locate device, monitor registered tourist coordinates</small></div><div class="toolbar"><button class="btn" onclick="fitIndia()">India View</button><button class="btn" onclick="locateMe()">My GPS</button><button class="btn primary" onclick="startTrackingPrompt()">Start Tourist GPS</button><button class="btn danger" onclick="stopTracking()">Stop Tracking</button></div></div><div class="mapWrap"><div id="fullMap" class="map mapLarge"></div><div class="mapLegend"><span class="dot" style="background:#22c7ad"></span>Tourist &nbsp; <span class="dot" style="background:#ff5c68"></span>SOS &nbsp; <span class="dot" style="background:#7fb0ff"></span>Response &nbsp; <span class="dot" style="background:#f7c55d"></span>Destination</div></div></div><div class="panel"><div class="pad"><div id="gpsBanner" class="liveTrack"><span class="pulse"></span><b>GPS ready · waiting for device location</b></div><div class="liveTrack"><span class="pulse"></span><div><b id="trackTitle">GPS status</b><div id="trackInfo" class="note">Select a registered tourist and press Start Tourist GPS. The browser will ask for Location permission when required.</div></div></div></div></div>`;setTimeout(()=>{map=buildMap('fullMap');if(lastGps)showGpsOnMap(lastGps.lat,lastGps.lon)},80)}
+function buildMap(id,small=false){if(!window.L)return;let m=baseMap(id);if(!m)return;if(!small){map=m;window._liveTouristMarkers=new Map()}let colors={tourist:'#22c7ad',sos:'#ff5c68',team:'#7fb0ff',dest:'#f7c55d'};destinations.forEach(d=>{let c=L.circleMarker([d.lat,d.lon],{radius:5,color:colors.dest,fillColor:colors.dest,fillOpacity:.7}).addTo(m).bindPopup(`<b>${esc(d.name)}</b><br>Risk index: ${d.risk}`);mapMarkers.push(c)});tourists.forEach(t=>{if(t.lat==null||t.lon==null)return;let stale=!t.lastSeen||(Date.now()-t.lastSeen>180000);let c=stale?'#5b6b80':(t.status==='sos'?colors.sos:colors.tourist);let mk=L.circleMarker([t.lat,t.lon],{radius:stale?6:8,color:c,fillColor:c,fillOpacity:stale?.55:.9}).addTo(m).bindPopup(`<b>${esc(t.name)}</b><br>${esc(t.id)}<br>Status: ${esc(t.status)}${stale?' · <span class="warnText">inactive/old fix</span>':''}<br>Last GPS: ${ago(t.lastSeen)}<br><button onclick="startSpecificGPS('${jsq(t.id)}')">Track this tourist</button><button onclick="adminDeleteTourist('${jsq(t.id)}')">Remove</button>`);mapMarkers.push(mk);if(!small&&window._liveTouristMarkers)window._liveTouristMarkers.set('tourist:'+t.id,mk)});teams.forEach(t=>{marker(m,t.lat,t.lon,`<b>${esc(t.name)}</b><br>${esc(t.status)}<br>${esc(t.base)}`)});alerts.filter(a=>a.status!=='resolved').forEach(a=>{let t=tourists.find(x=>x.id===a.tourist_id);if(t?.lat!=null)marker(m,t.lat,t.lon,`<b>SOS / Alert #${a.id}</b><br>${esc(t.name)}<br>${esc(a.message)}`)});return m}
+function mapPage(){stopTrackingIfLeavingMap(false);$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Live India Map</h3><small>Zoom, pan, locate device, monitor registered tourist coordinates</small></div><div class="toolbar"><button class="btn" onclick="fitIndia()">India View</button><button class="btn" onclick="locateMe()">My GPS</button><button class="btn primary" onclick="startTrackingPrompt()">Start Tourist GPS</button><button class="btn danger" onclick="stopTracking()">Stop Tracking</button></div></div><div class="mapWrap"><div id="fullMap" class="map mapLarge"></div><div class="mapLegend"><span class="dot" style="background:#22c7ad"></span>Tourist &nbsp; <span class="dot" style="background:#ff5c68"></span>SOS &nbsp; <span class="dot" style="background:#7fb0ff"></span>Response &nbsp; <span class="dot" style="background:#f7c55d"></span>Destination &nbsp; <span class="dot" style="background:#5b6b80"></span>Inactive (3m+)</div></div></div><div class="panel"><div class="pad"><div id="gpsBanner" class="liveTrack"><span class="pulse"></span><b>GPS ready · waiting for device location</b></div><div class="liveTrack"><span class="pulse"></span><div><b id="trackTitle">GPS status</b><div id="trackInfo" class="note">Select a registered tourist and press Start Tourist GPS. The browser will ask for Location permission when required.</div></div></div></div></div>`;setTimeout(()=>{map=buildMap('fullMap');if(lastGps)showGpsOnMap(lastGps.lat,lastGps.lon)},80)}
 function fitIndia(){if(map)map.setView([22.9734,78.6569],5)}
 function locateMe(){requestGpsOnce(p=>{if(map)showGpsOnMap(p.coords.latitude,p.coords.longitude);setGpsBanner('GPS connected · '+p.coords.latitude.toFixed(6)+', '+p.coords.longitude.toFixed(6));toast('Device GPS connected')},e=>setGpsBanner(gpsStatusText(e)))}
 function gpsContext(){return {supported:!!navigator.geolocation,secure:window.isSecureContext===true,top:window.top===window.self,permission:'unknown'}}
@@ -161,7 +161,16 @@ function startSpecificGPS(id){let t=tourists.find(x=>x.id===id);if(!t){toast('To
 function stopTracking(){if(watchId!==null)navigator.geolocation?.clearWatch(watchId);if(trackingId)audit('TRACKING_STOPPED','tourist',trackingId,'Device GPS tracking stopped');watchId=null;trackingId=null;setGpsBanner('GPS tracking stopped');toast('GPS tracking stopped')}
 function stopTrackingIfLeavingMap(){/* intentionally keep tracking when navigating; GPS belongs to the selected tourist */}
 function touristsPage(){let tracking=trackingId?tourists.find(x=>x.id===trackingId):null;$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Tourist Registry & Live Tracking</h3><small>Register with mobile number and explicit location consent · device GPS is requested only after a user action</small></div><div class="toolbar"><input id="touristSearch" placeholder="Search name / ID / destination" oninput="filterTourists()"><button class="btn primary" onclick="registerTourist()">+ Register Tourist</button></div></div>${tracking?`<div class="pad"><div class="liveTrack"><span class="pulse"></span><b>LIVE TRACKING: ${esc(tracking.name)}</b><button class="btn danger" style="margin-left:auto" onclick="stopTracking();touristsPage()">Stop</button></div></div>`:''}<div class="tableWrap"><table id="touristTable"><thead><tr><th>Tourist ID</th><th>Tourist / Mobile</th><th>Nationality</th><th>Destination</th><th>Status</th><th>GPS</th><th>Last Seen</th><th>Action</th></tr></thead><tbody>${tourists.map(t=>touristRow(t)).join('')}</tbody></table></div></div><div class="panel"><div class="pad consent"><b>Real GPS rule</b><p class="note">A dashboard cannot silently read another person's phone GPS. The tourist's own device must open the tracking page, provide permission and keep the tracking client active. This single-file version can collect real GPS from the device running it. Cross-device tracking uses Firebase when configured; PeerJS is retained as a live fallback. The tourist must explicitly allow Location on their own phone.</p></div></div>`}
-function touristRow(t){let gps=t.lat!=null?`${t.lat.toFixed(5)}, ${t.lon.toFixed(5)}`:'—';return `<tr><td><b>${esc(t.id)}</b></td><td><b>${esc(t.name)}</b><br><span class="phone">${esc(t.phone||'')}</span></td><td>${esc(t.nationality||'—')}</td><td>${esc(dn(t.destination_id))}</td><td>${badge(t.status)}</td><td>${gps}${t.accuracy?`<br><small>±${Math.round(t.accuracy)}m</small>`:''}</td><td>${ago(t.lastSeen)}</td><td><div class="toolbar"><button class="btn primary" onclick="startSpecificGPS('${jsq(t.id)}')">Track GPS</button><button class="btn" onclick="touristDetails('${jsq(t.id)}')">Details</button></div></td></tr>`}
+function touristRow(t){let gps=t.lat!=null?`${t.lat.toFixed(5)}, ${t.lon.toFixed(5)}`:'—';return `<tr><td><b>${esc(t.id)}</b></td><td><b>${esc(t.name)}</b><br><span class="phone">${esc(t.phone||'')}</span></td><td>${esc(t.nationality||'—')}</td><td>${esc(dn(t.destination_id))}</td><td>${badge(t.status)}</td><td>${gps}${t.accuracy?`<br><small>±${Math.round(t.accuracy)}m</small>`:''}</td><td>${ago(t.lastSeen)}</td><td><div class="toolbar"><button class="btn primary" onclick="startSpecificGPS('${jsq(t.id)}')">Track GPS</button><button class="btn" onclick="touristDetails('${jsq(t.id)}')">Details</button><button class="btn danger" onclick="adminDeleteTourist('${jsq(t.id)}')">Remove</button></div></td></tr>`}
+function adminDeleteTourist(id){
+  const t=tourists.find(x=>x.id===id);
+  if(!confirm(`Remove ${t?t.name:'this tourist'} from the list and shared database? Use this to clear old test/duplicate entries.`))return;
+  tourists=tourists.filter(x=>x.id!==id); save('st_tourists',tourists); cloudRemove('tourists/'+safeKey(id));
+  if(window._liveTouristMarkers){const mk=window._liveTouristMarkers.get('tourist:'+id);if(mk){try{mk.remove()}catch(e){} window._liveTouristMarkers.delete('tourist:'+id)}}
+  audit('DELETE','tourist',id,'Removed by admin');
+  toast('Tourist entry removed');
+  touristsPage();
+}
 function filterTourists(){let q=($('#touristSearch')?.value||'').toLowerCase();let a=tourists.filter(t=>(t.name+' '+t.id+' '+t.phone+' '+dn(t.destination_id)).toLowerCase().includes(q));$('#touristTable tbody').innerHTML=a.map(t=>touristRow(t)).join('')||'<tr><td colspan="8" class="empty">No matching tourists.</td></tr>'}
 function registerTourist(){modal(`<div class="head"><div><h3>Register Tourist</h3><small>Mobile number and location consent are mandatory for tracking</small></div></div><div class="pad fields"><div class="field"><label>Full name</label><input id="rname" placeholder="Tourist name"></div><div class="field"><label>Mobile number</label><input id="rphone" type="tel" placeholder="+91 98XXXXXXXX"></div><div class="field"><label>Nationality</label><input id="rnat" value="Indian"></div><div class="field"><label>Destination</label>${destSelect('rdest','delhi')}</div><div class="field span2"><label>Location consent</label><label class="consent"><input id="rconsent" type="checkbox"> I consent to location collection for safety tracking on this device.</label></div></div><div class="modalFoot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveTourist()">Register Tourist</button></div>`)}
 function saveTourist(){let name=$('#rname').value.trim(),phone=$('#rphone').value.trim(),consent=$('#rconsent').checked;if(!name||!phone){toast('Name and mobile number are required');return}if(!consent){toast('Please confirm location consent before connecting device GPS');return}let id='T-IND-'+String(Math.floor(1000+Math.random()*8999));let t={id,name,phone,nationality:$('#rnat').value||'Indian',destination_id:$('#rdest').value,status:'safe',lat:null,lon:null,lastSeen:null,consent:true,createdAt:Date.now()};tourists.unshift(t);save('st_tourists',tourists);cloudSet('tourists/'+safeKey(id),t);audit('REGISTER','tourist',id,`${name} ${phone}`);closeModal();touristsPage();toast('Tourist registered. GPS must be allowed on the tourist phone.')}
@@ -384,11 +393,13 @@ function updateLiveMapMarkers(){
   const live= tourists.filter(t=>t.lat!=null&&t.lon!=null);
   live.forEach(t=>{
     let key='tourist:'+t.id, item=window._liveTouristMarkers?.get(key);
-    const color=t.status==='sos'?'#ff5c68':'#22c7ad';
-    const html=`<b>${esc(t.name)}</b><br>${esc(t.id)}<br>Status: ${esc(t.status)}<br>GPS: ${t.lat.toFixed(6)}, ${t.lon.toFixed(6)}<br>Last GPS: ${ago(t.lastSeen)}`;
+    const stale=!t.lastSeen||(Date.now()-t.lastSeen>180000);
+    const color=stale?'#5b6b80':(t.status==='sos'?'#ff5c68':'#22c7ad');
+    const html=`<b>${esc(t.name)}</b><br>${esc(t.id)}<br>Status: ${esc(t.status)}${stale?' · <span class="warnText">inactive/old fix</span>':''}<br>GPS: ${t.lat.toFixed(6)}, ${t.lon.toFixed(6)}<br>Last GPS: ${ago(t.lastSeen)}<br><button onclick="adminDeleteTourist('${jsq(t.id)}')">Remove</button>`;
+    const radius=stale?6:8, opacity=stale?.55:.9;
     if(!window._liveTouristMarkers)window._liveTouristMarkers=new Map();
-    if(item){item.setLatLng([t.lat,t.lon]);item.setPopupContent(html)}
-    else{item=L.circleMarker([t.lat,t.lon],{radius:8,color,fillColor:color,fillOpacity:.9}).addTo(map).bindPopup(html);window._liveTouristMarkers.set(key,item)}
+    if(item){item.setLatLng([t.lat,t.lon]);item.setPopupContent(html);item.setStyle({color,fillColor:color,radius,fillOpacity:opacity})}
+    else{item=L.circleMarker([t.lat,t.lon],{radius,color,fillColor:color,fillOpacity:opacity}).addTo(map).bindPopup(html);window._liveTouristMarkers.set(key,item)}
   });
 }
 function initLiveAdmin(){
@@ -430,7 +441,7 @@ function connectTouristToRoom(room){
     window.liveAdminConn.on('open',()=>{
       liveRoomReady=true; window.touristRegisteredAck=false;
       setLivePill('LIVE · CONNECTED'); toast('Connected to SmartTour control room');
-      if(!window.touristLiveId){window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));}
+      if(!window.touristLiveId){window.touristLiveId=localStorage.getItem('smarttour_tourist_id')||('T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8)));try{localStorage.setItem('smarttour_tourist_id',window.touristLiveId);}catch(e){}}
       renderTouristClient(window.touristLiveId);
       if(window.touristLiveRecord)sendTouristRegistration();
       startTouristRegisterRetry();
@@ -500,7 +511,18 @@ async function startTouristClient(){
   liveRole='tourist';
   liveRoomReady=!!fb.ready;
   setLivePill(fb.ready?'FIREBASE CONNECTED':'GPS READY');
-  if(!window.touristLiveId)window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));
+  // Reuse the SAME tourist identity across reloads on this phone/browser instead of
+  // minting a brand-new random ID every time the page opens. Without this, every
+  // reload/re-open of Tourist Mode created a fresh duplicate "ghost" tourist entry
+  // in Firebase that never got cleaned up — which is why an earlier test
+  // registration kept showing on the admin map next to the real live tourist.
+  if(!window.touristLiveId){
+    window.touristLiveId=localStorage.getItem('smarttour_tourist_id')||('T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8)));
+    try{localStorage.setItem('smarttour_tourist_id',window.touristLiveId);}catch(e){}
+  }
+  if(!window.touristLiveRecord){
+    try{const saved=localStorage.getItem('smarttour_tourist_record');if(saved)window.touristLiveRecord=JSON.parse(saved);}catch(e){}
+  }
   renderTouristClient(window.touristLiveId);
 }
 
@@ -539,8 +561,14 @@ function registerTouristClient(id){
 
   // IMPORTANT: keep this location request in the same user-click flow as registration.
   // This is what allows the phone browser to show its native Location permission prompt.
-  const t={id,name,phone,nationality:$('#tcNat').value.trim()||'Indian',destination_id:$('#tcDest').value,consent:true,status:'safe',lat:null,lon:null,lastSeen:null,createdAt:Date.now(),live:true};
+  // Carry forward any location already known for this same tourist ID (e.g. from a
+  // previous session on this phone) instead of wiping it to null — otherwise every
+  // re-registration/reload made the tourist's marker vanish from the map until a
+  // brand-new GPS fix happened to arrive.
+  const prev=tourists.find(x=>x.id===id)||window.touristLiveRecord||{};
+  const t={id,name,phone,nationality:$('#tcNat').value.trim()||'Indian',destination_id:$('#tcDest').value,consent:true,status:prev.status==='sos'?'sos':'safe',lat:prev.lat??null,lon:prev.lon??null,accuracy:prev.accuracy??null,speed:prev.speed??null,heading:prev.heading??null,lastSeen:prev.lastSeen??null,createdAt:prev.createdAt||Date.now(),live:true};
   window.touristLiveRecord=t; window.touristRegisteredAck=false;
+  try{localStorage.setItem('smarttour_tourist_id',id);localStorage.setItem('smarttour_tourist_record',JSON.stringify(t));}catch(e){}
   tourists=tourists.filter(x=>x.id!==id); tourists.unshift(t); save('st_tourists',tourists); audit('REGISTER','tourist',id,`${name} · live tracking`);
   renderTouristClient(id);
   // Start the real device GPS immediately after the user's Register click.
@@ -566,7 +594,7 @@ function deleteMyTouristEntry(id){
   try{if(window.liveAdminConn?.open)window.liveAdminConn.send({type:'delete_tourist',id});}catch(e){} cloudRemove('tourists/'+safeKey(id));
   tourists=tourists.filter(x=>x.id!==id);
   save('st_tourists',tourists);
-  try{localStorage.removeItem('smarttour_tourist_record');}catch(e){}
+  try{localStorage.removeItem('smarttour_tourist_record');localStorage.removeItem('smarttour_tourist_id');}catch(e){}
   window.touristLiveRecord=null;
   window.touristLiveId=null;
   window.touristRegisteredAck=false;
