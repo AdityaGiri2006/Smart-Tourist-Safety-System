@@ -94,6 +94,21 @@ async function initFirebaseBackend(){
     return true;
   }catch(e){console.error('Firebase init failed',e);backendMode='local';setLivePill('FIREBASE ERROR');return false}
 }
+let fbRetryTimer=null;
+function keepFirebaseAlive(){
+  // If the very first connection attempt fails (cold start, slow mobile data,
+  // momentary network drop, etc.) the app used to just stay in 'local' mode
+  // forever with no cross-device sync until the page was manually reloaded.
+  // This quietly keeps retrying with the SAME initFirebaseBackend() function
+  // above (no Firebase config/logic changed) until it succeeds.
+  clearInterval(fbRetryTimer);
+  fbRetryTimer=setInterval(async()=>{
+    if(fb.ready){clearInterval(fbRetryTimer);return}
+    if(!firebaseConfigured())return;
+    firebaseInitPromise=initFirebaseBackend();
+    await firebaseInitPromise;
+  },8000);
+}
 async function waitForFirebase(timeoutMs=12000){
   if(fb.ready)return true;
   if(firebaseInitPromise){try{await Promise.race([firebaseInitPromise,new Promise(r=>setTimeout(()=>r(false),timeoutMs))]);}catch(e){}}
@@ -195,18 +210,22 @@ async function searchNearbyCoords(lat,lon,label){
  const ambulance=`[out:json][timeout:12];nwr(around:${Math.round(km*1000)},${lat},${lon})[emergency="ambulance_station"];out center tags;`;
  const hosts=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
  let items=[];
- // One combined Overpass request per mirror, instead of 12 sequential requests. This avoids the old endless-loading behavior.
- for(const host of hosts){
+ // Fire all mirrors in PARALLEL and use whichever answers first with real data.
+ // The old code tried each mirror one after another (up to 3 x 11s = 33s before
+ // giving up), which is what made facility search feel permanently stuck on
+ // "Loading hospitals, police and ambulance facilities…".
+ const fetchOverpassHost=async(host)=>{
+   const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),9000);
    try{
-     const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),11000);
      const body=query+'\n'+ambulance;
      const r=await fetch(host,{method:'POST',body:new URLSearchParams({data:body}),cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},signal:ctrl.signal});
-     clearTimeout(timer);
-     if(!r.ok)continue;
+     if(!r.ok)throw new Error('bad status');
      const j=await r.json();
-     if(Array.isArray(j.elements)){items=j.elements;break;}
-   }catch(e){}
- }
+     if(Array.isArray(j.elements)&&j.elements.length)return j.elements;
+     throw new Error('empty response');
+   }finally{clearTimeout(timer)}
+ };
+ try{ items=await Promise.any(hosts.map(fetchOverpassHost)); }catch(e){ items=[]; }
  if(items.length){
    items=dedupeFacilities(items).map(x=>{let c=x.center||x,t=x.tags||{};return {...x,lat:Number(c.lat),lon:Number(c.lon),tags:t,dist:dkm(lat,lon,Number(c.lat),Number(c.lon))}})
     .filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)).sort((a,b)=>a.dist-b.dist).slice(0,80);
@@ -223,15 +242,19 @@ async function fallbackNominatim(lat,lon,label){
  let out=$('#nearOut'),items=[]; const km=Number($('#nearRadius')?.value||10);
  // Nominatim is a geocoder, so use a few concrete facility terms inside the GPS bounding box.
  const terms=['hospital','clinic','police station','ambulance station'];
- for(const term of terms){
+ // Search all four terms at the same time instead of one-after-another.
+ const fetchNominatimTerm=async(term)=>{
    try{
     const u=nominatimSearchUrl(term,lat,lon,km);
     const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),6500);
     const r=await fetch(u,{cache:'no-store',headers:{'Accept':'application/json'}}); clearTimeout(timer);
-    if(!r.ok)continue; const j=await r.json();
-    items.push(...j.map(x=>({lat:Number(x.lat),lon:Number(x.lon),dist:dkm(lat,lon,Number(x.lat),Number(x.lon)),tags:{name:x.name||x.display_name?.split(',')[0]||term,amenity:term,display:x.display_name,phone:x.extratags?.phone||x.extratags?.['contact:phone']||''}})));
-   }catch(e){}
- }
+    if(!r.ok)return [];
+    const j=await r.json();
+    return j.map(x=>({lat:Number(x.lat),lon:Number(x.lon),dist:dkm(lat,lon,Number(x.lat),Number(x.lon)),tags:{name:x.name||x.display_name?.split(',')[0]||term,amenity:term,display:x.display_name,phone:x.extratags?.phone||x.extratags?.['contact:phone']||''}}));
+   }catch(e){return []}
+ };
+ const nominatimResults=await Promise.all(terms.map(fetchNominatimTerm));
+ nominatimResults.forEach(r=>items.push(...r));
  items=dedupeFacilities(items).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)).sort((a,b)=>a.dist-b.dist).slice(0,60);
  nearbyResults=items;
  if(items.length){ renderNearby(items,label); return; }
@@ -605,6 +628,13 @@ async function startSpecificGPS(id,force=false){
   audit('TRACKING_STARTED','tourist',id,'Real device GPS watch started');
   toast('Requesting your phone location… tap Allow if prompted');
   updateTouristPermissionBadge();
+  // If nothing has come back after a few seconds, tell the tourist what to check
+  // instead of leaving the screen silently on "Requesting your phone location…".
+  setTimeout(()=>{
+    if(!firstFix && trackingId===id){
+      setGpsBanner('Still waiting for a GPS fix… if your browser showed a Location popup, tap Allow. If not, check Settings → Location is turned ON for this browser.');
+    }
+  },7000);
 }
 
 async function touristNearbyHelp(){
@@ -628,7 +658,7 @@ function settingsPage(){
   const configured=firebaseConfigured();
   $('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Production Data Backend</h3><small>Firebase Realtime Database + anonymous authentication</small></div>${badge(fb.ready?'live':configured?'configured':'setup required')}</div><div class="pad"><div class="liveTrack"><b>${fb.ready?'🟢 Firebase connected':'⚠ Firebase setup required'}</b><p class="note">For true cross-device storage, replace SMARTTOUR_FIREBASE_CONFIG in this HTML with your Firebase web-app config, enable Realtime Database and Anonymous Authentication, then deploy this same file over HTTPS (for example GitHub Pages / Firebase Hosting).</p><p class="note">Backend mode: ${esc(backendMode)}. WebRTC remains a fast live fallback, but admin entries and tourist GPS are persisted to Firebase when configured.</p></div></div></div><div class="panel"><div class="head"><h3>Real data sources</h3></div><div class="pad note"><p><b>GPS:</b> browser Geolocation API with explicit tourist permission; HTTPS required on phones.</p><p><b>Facilities:</b> live OpenStreetMap / Overpass data near exact GPS.</p><p><b>Weather:</b> live Open-Meteo data for coordinates.</p><p><b>Emergency:</b> 112 uses the phone dialer. Official police/ambulance dispatch APIs require government authorization.</p><p><b>Background limitation:</b> normal mobile browsers may suspend GPS when screen locks or page is closed. Continuous closed-app tracking requires a native app or installed PWA with platform-specific background-location support.</p></div></div>`;
 }
-async function init(){navRender();firebaseInitPromise=initFirebaseBackend();await firebaseInitPromise;$$('[data-page]').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.page);$('#shell').classList.remove('navopen');$('#shade').style.display='none'}));$('#menu').onclick=()=>{$('#shell').classList.add('navopen');$('#shade').style.display='block'};$('#shade').onclick=()=>{$('#shell').classList.remove('navopen');$('#shade').style.display='none'};$('#modalShade').onclick=e=>{if(e.target.id==='modalShade')closeModal()};const qs=new URLSearchParams(location.search);const isTourist=qs.has('tourist');if(isTourist){liveRole='tourist';document.body.classList.add('tourist-mode');await go('dashboard');openTouristMode()}else{initLiveAdmin();await go('dashboard')}}
+async function init(){navRender();firebaseInitPromise=initFirebaseBackend();await firebaseInitPromise;keepFirebaseAlive();$$('[data-page]').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.page);$('#shell').classList.remove('navopen');$('#shade').style.display='none'}));$('#menu').onclick=()=>{$('#shell').classList.add('navopen');$('#shade').style.display='block'};$('#shade').onclick=()=>{$('#shell').classList.remove('navopen');$('#shade').style.display='none'};$('#modalShade').onclick=e=>{if(e.target.id==='modalShade')closeModal()};const qs=new URLSearchParams(location.search);const isTourist=qs.has('tourist');if(isTourist){liveRole='tourist';document.body.classList.add('tourist-mode');await go('dashboard');openTouristMode()}else{initLiveAdmin();await go('dashboard')}}
 window.addEventListener('beforeunload',()=>{if(watchId!==null)navigator.geolocation?.clearWatch(watchId)});init();
 </script>
 </body>
