@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Permissions-Policy" content="geolocation=*">
+<title>SmartTour India — Tourist Safety Command Center</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#07111d;color:#edf5ff}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{min-height:100vh;display:grid;grid-template-columns:270px 1fr}aside{position:sticky;top:0;height:100vh;background:#0a1624;border-right:1px solid #203149;display:flex;flex-direction:column;z-index:50}.brand{padding:18px 16px;border-bottom:1px solid #203149;display:flex;align-items:center;gap:11px}.logo{width:40px;height:40px;border-radius:11px;background:#22c7ad;color:#04251f;display:grid;place-items:center;font-weight:900}.brand b{font-size:14px}.brand small{display:block;color:#8195ae;font-size:10px;margin-top:3px}.nav{padding:10px;overflow:auto;flex:1}.group{color:#667a94;font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:14px 9px 5px}.nav button{width:100%;background:transparent;border:0;color:#a6b6ca;text-align:left;border-radius:8px;padding:10px 11px;margin:2px 0;font-size:11px;display:flex;gap:10px;align-items:center}.nav button:hover,.nav button.active{background:#132c45;color:#36d9bf}.nav .ico{width:18px;text-align:center}.sidefoot{padding:13px;border-top:1px solid #203149;color:#8195ae;font-size:10px}.statusdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#35d49a;margin-right:6px}.main{min-width:0}header{height:68px;position:sticky;top:0;z-index:40;background:#07111df0;border-bottom:1px solid #203149;display:flex;align-items:center;padding:0 20px;gap:12px;backdrop-filter:blur(12px)}header h1{font-size:16px;margin:0}header p{font-size:10px;color:#8195ae;margin:3px 0}.menu{display:none;background:#102238;color:white;border:1px solid #29415e;border-radius:7px;padding:7px 10px}.spacer{flex:1}.livepill{padding:7px 10px;border:1px solid #2dd4bf55;background:#2dd4bf10;color:#45e0c7;border-radius:20px;font-size:10px;font-weight:800}.page{padding:18px;display:grid;gap:15px}.hero{padding:19px;border:1px solid #22364e;border-radius:12px;background:#0c1b2b}.hero h2{margin:0 0 7px;font-size:21px}.hero p{margin:0;color:#91a5bd;font-size:11px;line-height:1.65}.heroRow{display:flex;gap:15px;align-items:center}.heroKpi{margin-left:auto;min-width:160px;border:1px solid #2dd4bf38;border-radius:10px;padding:12px;text-align:center;background:#2dd4bf0a}.heroKpi b{display:block;font:700 24px ui-monospace,monospace;color:#36d9bf}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}.kpi{border:1px solid #22364e;background:#0b1828;border-radius:10px;padding:14px}.kpi b{display:block;font:700 24px ui-monospace,monospace}.kpi span{color:#8da1ba;font-size:10px}.grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:15px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.panel{border:1px solid #22364e;background:#0b1828;border-radius:10px;overflow:hidden}.head{padding:13px 14px;border-bottom:1px solid #1d3046;display:flex;align-items:center;justify-content:space-between;gap:10px}.head h3{font-size:12px;margin:0}.head small{display:block;color:#8195ae;font-size:9px;margin-top:3px}.pad{padding:14px}.btn{border:1px solid #2a405b;background:#102238;color:#eaf2fc;border-radius:7px;padding:8px 11px;font-size:10px}.btn:hover{filter:brightness(1.15)}.primary{background:#22c7ad;border-color:#22c7ad;color:#03251f;font-weight:800}.danger{background:#ff5c6815;border-color:#ff5c6850;color:#ff8089}.warn{color:#f7c15b;border-color:#f7c15b55}.ghost{background:transparent}.toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.toolbar input,.toolbar select,.field input,.field select,.field textarea{background:#0e1f32;color:#edf5ff;border:1px solid #29415e;border-radius:7px;padding:8px 9px;outline:none;width:100%}.toolbar input,.toolbar select{width:auto}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:9px;color:#8195ae}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.span2{grid-column:1/-1}.tableWrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{padding:9px 10px;border-bottom:1px solid #1a2c40;text-align:left;white-space:nowrap}th{font-size:8.5px;color:#71859e;text-transform:uppercase}.badge{display:inline-block;border-radius:20px;padding:4px 7px;font-size:8.5px;font-weight:800;text-transform:capitalize}.badge.high,.badge.sos,.badge.active{background:#ff5c6815;color:#ff7b83}.badge.medium,.badge.acknowledged,.badge.enroute{background:#f7b84b15;color:#f7c55d}.badge.low,.badge.safe,.badge.resolved,.badge.available,.badge.onsite{background:#35d49a15;color:#42dfa4}.note{font-size:10px;line-height:1.6;color:#8297b0}.empty{text-align:center;color:#71859e;padding:26px;font-size:10px}.dashGrid{display:grid;grid-template-columns:1.35fr .85fr;gap:15px}.map{height:420px;background:#07111d}.mapLarge{height:560px}.mapWrap{position:relative}.mapTools{position:absolute;top:10px;right:10px;z-index:500}.mapLegend{position:absolute;left:10px;bottom:10px;z-index:500;background:#07111de8;border:1px solid #29415e;border-radius:7px;padding:8px;font-size:8.5px;line-height:1.8}.mapPlaceLabel{background:#0b1828e8;border:1px solid #29415e;color:#edf5ff;border-radius:6px;padding:2px 5px;box-shadow:0 4px 14px #0006;font-size:9px;font-weight:700;white-space:nowrap}.mapPlaceLabel.dest{border-color:#f7c55d77;color:#f7d98a}.mapPlaceLabel.facility{border-color:#7fb0ff77;color:#b9d2ff}.mapPlaceLabel.tourist{border-color:#22c7ad77;color:#74ead8}.mapPlaceLabel.alert{border-color:#ff5c6877;color:#ff9aa1}.mapPlaceLabel.local{border-color:#b8c6d877;color:#d4deea}.mapInfoBox{position:absolute;left:10px;top:10px;z-index:500;background:#07111de8;border:1px solid #29415e;border-radius:8px;padding:8px 10px;font-size:9px;line-height:1.55;max-width:320px}.mapInfoBox b{color:#edf5ff}.mapInfoBox span{color:#8da1ba;display:block;margin-top:2px}.mapInfoBox .mapMiniGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:7px}.mapInfoBox .mapMini{border:1px solid #29415e;border-radius:6px;padding:5px;background:#0b1828}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.sideList{display:grid;gap:9px}.item{border:1px solid #22364e;border-radius:8px;padding:10px;background:#0d1d2e}.itemTop{display:flex;justify-content:space-between;gap:8px}.item b{font-size:10.5px}.item small{color:#8195ae;font-size:9.5px;line-height:1.5}.metric{font:700 24px ui-monospace,monospace}.statGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{border:1px solid #243a53;border-radius:8px;padding:11px;background:#0d1d2e}.stat b{font:700 18px ui-monospace,monospace}.stat small{display:block;color:#8195ae;font-size:8.5px;margin-top:4px}.actionGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.actionGrid .btn{min-height:42px}.emergency{display:grid;grid-template-columns:1fr 1fr;gap:11px}.emcard{padding:15px}.emnum{font:700 27px ui-monospace,monospace;color:#36d9bf;margin:6px 0}.call{display:inline-flex;text-decoration:none;align-items:center;justify-content:center}.facility{border:1px solid #243a53;border-radius:9px;background:#0d1d2e;padding:11px;margin:8px 0}.facility h4{font-size:11px;margin:0 0 5px}.facility .meta{font-size:9px;color:#8297b0;line-height:1.55}.source{font-size:8.5px;color:#79a8ff}.liveTrack{border:1px solid #35d49a44;background:#35d49a0b;padding:11px;border-radius:8px}.sosPulse{animation:sosMapPulse 1.15s infinite;filter:drop-shadow(0 0 5px #ff5c68)}@keyframes sosMapPulse{0%,100%{opacity:1}50%{opacity:.35}}.pulse{display:inline-block;width:9px;height:9px;background:#35d49a;border-radius:50%;margin-right:7px;box-shadow:0 0 0 0 #35d49a;animation:pulse 1.5s infinite}@keyframes pulse{70%{box-shadow:0 0 0 9px transparent}}.progress{height:8px;background:#182b40;border-radius:9px;overflow:hidden}.progress i{display:block;height:100%;background:#22c7ad}.toast{position:fixed;right:18px;bottom:18px;z-index:2000;max-width:360px;background:#102238;border:1px solid #2a405b;border-radius:8px;padding:11px 13px;font-size:10px;display:none;box-shadow:0 15px 40px #0008}.shade{position:fixed;inset:0;background:#0009;z-index:100;display:none}.modalShade{position:fixed;inset:0;background:#000b;display:none;place-items:center;padding:18px;z-index:1500}.modalShade.open{display:grid}.modal{width:min(700px,100%);max-height:90vh;overflow:auto;background:#0b1828;border:1px solid #29415e;border-radius:10px}.modalFoot{padding:12px 14px;border-top:1px solid #203149;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.small{font-size:9px}.link{color:#62a3ff;text-decoration:none}.ok{color:#40dfa2}.error{color:#ff7b83}.warnText{color:#f7c55d}.hidden{display:none!important}.footer{text-align:center;color:#60738d;font-size:8px;padding:2px 0 8px}.trackLine{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all}.consent{border:1px solid #f7b84b44;background:#f7b84b0b;padding:11px;border-radius:8px}.searchBox{display:grid;grid-template-columns:1fr auto auto;gap:8px}.refBox{display:grid;gap:9px}.weatherNow{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;align-items:stretch}.weatherMain{border:1px solid #29415e;border-radius:9px;padding:15px;background:#0d1d2e}.weatherMain .big{font:700 32px ui-monospace,monospace}.weatherCards{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.weatherCard{border:1px solid #29415e;border-radius:9px;padding:11px;background:#0d1d2e}.weatherCard b{font:700 18px ui-monospace,monospace}.weatherCard small{display:block;color:#8297b0;font-size:8.5px;margin-top:3px}.phone{font:700 10px ui-monospace,monospace;color:#9bc0ff}.route{color:#7fb0ff}.dangerText{color:#ff7b83}.muted{color:#8195ae}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.dashGrid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:820px){.shell{display:block}aside{position:fixed;left:0;transform:translateX(-105%);transition:.2s;width:275px}.shell.navopen aside{transform:translateX(0)}.menu{display:block}.kpis{grid-template-columns:1fr 1fr}.heroRow{align-items:flex-start;flex-direction:column}.heroKpi{margin-left:0;width:100%}.actionGrid{grid-template-columns:1fr 1fr}.emergency{grid-template-columns:1fr}.weatherNow{grid-template-columns:1fr}}
+@media(max-width:520px){header{padding:0 12px}.page{padding:11px}.kpis,.grid3,.fields,.actionGrid,.statGrid{grid-template-columns:1fr}.searchBox{grid-template-columns:1fr}.map{height:390px}.mapLarge{height:470px}.hero h2{font-size:18px}}
+body.tourist-mode aside{display:none}body.tourist-mode .shell{grid-template-columns:1fr}body.tourist-mode header .menu,body.tourist-mode #touristModeBtn{display:none}body.tourist-mode .page{max-width:760px;margin:auto}body.tourist-mode header{position:sticky;top:0}body.tourist-mode .page{padding-bottom:28px}body.tourist-mode .btn{min-height:44px;padding:10px 13px;font-size:11px}body.tourist-mode .field input,body.tourist-mode .field select,body.tourist-mode .field textarea{min-height:44px;font-size:16px}body.tourist-mode input[type=checkbox]{transform:scale(1.2);margin-right:7px}@media(max-width:820px){body.tourist-mode header{height:62px;padding:0 12px}body.tourist-mode header h1{font-size:15px}body.tourist-mode header p{font-size:9px}body.tourist-mode .page{max-width:100%;padding:10px}.touristMobileHero{display:block!important}.modalShade{padding:8px}.modal{max-height:94vh;border-radius:14px}.modalFoot{position:sticky;bottom:0;background:#0b1828}.modalFoot .btn{flex:1}.touristMobileOnly{display:block!important}}.touristMobileHero,.touristMobileOnly{display:none} </style>
+</head>
+<body>
+<div class="shell" id="shell">
+<aside id="side">
+  <div class="brand"><div class="logo">ST</div><div><b>SmartTour India</b><small>Tourist Safety System</small></div></div>
+  <div class="nav">
+    <div class="group">Monitoring</div>
+    <button data-page="dashboard" class="active"><span class="ico">▦</span>Dashboard</button>
+    <button data-page="map"><span class="ico">⌖</span>Live Map</button>
+    <button data-page="tourists"><span class="ico">◉</span>Tourists & Tracking</button>
+    <button data-page="alerts"><span class="ico">!</span>Emergency Alerts / SOS</button>
+    <div class="group">Response</div>
+    <button data-page="rescue"><span class="ico">✚</span>Rescue Operations</button>
+    <button data-page="resources"><span class="ico">☎</span>Emergency Resources</button>
+    <button data-page="nearby"><span class="ico">⌁</span>Hospitals / Police / Ambulance</button>
+    <div class="group">Intelligence</div>
+    <button data-page="risk"><span class="ico">◒</span>Risk Intelligence</button>
+    <button data-page="weather"><span class="ico">☁</span>Live Weather</button>
+    <button data-page="incidents"><span class="ico">▤</span>Incident Reports</button>
+    <button data-page="audit"><span class="ico">◷</span>Audit Trail</button>
+    <div class="group">System</div>
+    <button data-page="notifications"><span class="ico">◌</span>Notifications</button>
+    <button data-page="settings"><span class="ico">⚙</span>Settings</button>
+  </div>
+  <div class="sidefoot"><span class="statusdot"></span>Browser operational · India</div>
+</aside>
+<main>
+<header><button class="menu" id="menu">☰</button><div><h1 id="title">Dashboard</h1><p id="subtitle">Real-time tourist safety overview</p></div><div class="spacer"></div><button class="btn primary" id="liveRoomBtn" onclick="showLiveRoom()">● LIVE ROOM</button><button class="btn" id="touristModeBtn" onclick="openTouristMode()">Tourist Mode</button></header>
+<div id="app" class="page"></div>
+</main>
+</div>
+<div id="shade" class="shade"></div><div id="toast" class="toast"></div><div id="modalShade" class="modalShade"><div class="modal" id="modal"></div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const titles={dashboard:['Dashboard','Real-time tourist safety overview'],map:['Live Map','India-wide operational map'],tourists:['Tourists & Tracking','Registered tourists and consent-based GPS tracking'],alerts:['Emergency Alerts / SOS','SOS requests and incident alerts'],rescue:['Rescue Operations','Response teams and operational status'],resources:['Emergency Resources','Emergency numbers and device actions'],nearby:['Hospitals / Police / Ambulance','Live mapped emergency facilities near a location'],risk:['Risk Intelligence','Destination risk and alert concentration'],weather:['Live Weather','Current weather from a public meteorological API'],incidents:['Incident Reports','Operational incident records'],audit:['Audit Trail','Traceable actions performed in this browser'],notifications:['Notifications','Open safety alerts'],settings:['Settings','Live room, GPS and device configuration']};
+const destinations=[
+{id:'delhi',name:'India Gate & Central Delhi',city:'New Delhi',state:'Delhi',lat:28.6129,lon:77.2295,risk:34},{id:'agra',name:'Taj Mahal',city:'Agra',state:'Uttar Pradesh',lat:27.1751,lon:78.0421,risk:28},{id:'jaipur',name:'Jaipur Old City & Amer',city:'Jaipur',state:'Rajasthan',lat:26.9124,lon:75.7873,risk:39},{id:'gwalior',name:'Gwalior Fort',city:'Gwalior',state:'Madhya Pradesh',lat:26.2298,lon:78.1734,risk:31},{id:'rishikesh',name:'Rishikesh Riverfront',city:'Rishikesh',state:'Uttarakhand',lat:30.0869,lon:78.2676,risk:56},{id:'manali',name:'Solang Valley, Manali',city:'Manali',state:'Himachal Pradesh',lat:32.3166,lon:77.1725,risk:62},{id:'goa',name:'Baga-Calangute Coast',city:'Calangute',state:'Goa',lat:15.5557,lon:73.7517,risk:48},{id:'mumbai',name:'Gateway of India',city:'Mumbai',state:'Maharashtra',lat:18.9220,lon:72.8347,risk:35},{id:'hampi',name:'Hampi Heritage Zone',city:'Hampi',state:'Karnataka',lat:15.3350,lon:76.4600,risk:41},{id:'chennai',name:'Marina Beach',city:'Chennai',state:'Tamil Nadu',lat:13.0500,lon:80.2824,risk:44},{id:'kolkata',name:'Victoria Memorial',city:'Kolkata',state:'West Bengal',lat:22.5448,lon:88.3426,risk:32},{id:'srinagar',name:'Dal Lake',city:'Srinagar',state:'Jammu & Kashmir',lat:34.0837,lon:74.7973,risk:51},{id:'kochi',name:'Fort Kochi',city:'Kochi',state:'Kerala',lat:9.9658,lon:76.2421,risk:29},{id:'puri',name:'Puri Beach & Jagannath',city:'Puri',state:'Odisha',lat:19.8135,lon:85.8312,risk:46},{id:'gangtok',name:'Gangtok',city:'Gangtok',state:'Sikkim',lat:27.3389,lon:88.6065,risk:43},{id:'vizag',name:'Visakhapatnam Coast',city:'Visakhapatnam',state:'Andhra Pradesh',lat:17.6868,lon:83.2185,risk:38},{id:'hyderabad',name:'Charminar',city:'Hyderabad',state:'Telangana',lat:17.3616,lon:78.4747,risk:30},{id:'amritsar',name:'Golden Temple',city:'Amritsar',state:'Punjab',lat:31.6200,lon:74.8765,risk:27}
+];
+let tourists=load('st_tourists',[]);
+let alerts=load('st_alerts',[]);
+let incidents=load('st_incidents',[]);
+let auditRows=load('st_audit',[]),dispatchLog=load('st_dispatch',[]),teams=load('st_teams',[]);
+let page='dashboard',map=null,mapMarkers=[],watchId=null,trackingId=null,lastGps=null,nearbyCoords=null,nearbyResults=[],toastTimer=null;
+let livePeer=null, livePeerId='', liveConnections=new Set(), liveRole='admin', liveRoomReady=false, liveLastBroadcast=0, liveRoomCode='', touristRegisterTimer=null, touristReconnectTimer=null;
+
+/* ===== FIREBASE REAL BACKEND CONFIG =====
+   Replace these values once with your Firebase web-app config.
+   Enable Realtime Database + Anonymous Authentication in Firebase Console.
+   The same hosted index.html then works from desktop and tourist phones. */
+const SMARTTOUR_FIREBASE_CONFIG={
+  apiKey:'AIzaSyD8oClYSmeTl6mVKAve8RJO8Cx1pMc-PeM',
+  authDomain:'smarttour-india-25490.firebaseapp.com',
+  databaseURL:'https://smarttour-india-25490-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId:'smarttour-india-25490',
+  appId:'1:15163859587:web:6156b618092a655c5071b6'
+};
+let fb={ready:false,db:null,auth:null,api:null,unsubs:[]}, backendMode='local';
+let firebaseInitPromise=null;
+function firebaseConfigured(){return SMARTTOUR_FIREBASE_CONFIG.apiKey&&!SMARTTOUR_FIREBASE_CONFIG.apiKey.startsWith('PASTE_')&&SMARTTOUR_FIREBASE_CONFIG.databaseURL&&!SMARTTOUR_FIREBASE_CONFIG.databaseURL.includes('PASTE_')}
+async function initFirebaseBackend(){
+  if(!firebaseConfigured()){backendMode='local';setLivePill('SETUP FIREBASE');return false}
+  try{
+    const appMod=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js');
+    const authMod=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js');
+    const dbMod=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js');
+    const app=appMod.initializeApp(SMARTTOUR_FIREBASE_CONFIG);
+    const auth=authMod.getAuth(app);
+    await authMod.signInAnonymously(auth);
+    const db=dbMod.getDatabase(app);
+    fb={ready:true,db,auth,api:{...dbMod},unsubs:[]}; backendMode='firebase'; setLivePill('FIREBASE LIVE');
+    const watch=(path,fn)=>{const u=dbMod.onValue(dbMod.ref(db,path),snap=>fn(snap.val()));fb.unsubs.push(u)};
+    watch('tourists',v=>{tourists=v?Object.values(v):[];save('st_tourists',tourists);refreshCurrentPage()});
+    watch('alerts',v=>{alerts=v?Object.values(v):[];save('st_alerts',alerts);refreshCurrentPage()});
+    watch('incidents',v=>{incidents=v?Object.values(v):[];save('st_incidents',incidents);if(page==='incidents')incidentsPage()});
+    watch('teams',v=>{teams=v?Object.values(v):[];save('st_teams',teams);if(page==='rescue'||page==='dashboard')refreshCurrentPage()});
+    return true;
+  }catch(e){console.error('Firebase init failed',e);backendMode='local';setLivePill('FIREBASE ERROR');return false}
+}
+async function waitForFirebase(timeoutMs=12000){
+  if(fb.ready)return true;
+  if(firebaseInitPromise){try{await Promise.race([firebaseInitPromise,new Promise(r=>setTimeout(()=>r(false),timeoutMs))]);}catch(e){}}
+  return fb.ready;
+}
+function safeKey(x){return String(x).replace(/[.#$\[\]\/]/g,'_')}
+async function cloudSet(path,value){if(!fb.ready)return false;try{await fb.api.set(fb.api.ref(fb.db,path),value);return true}catch(e){console.error(e);return false}}
+async function cloudRemove(path){if(!fb.ready)return false;try{await fb.api.remove(fb.api.ref(fb.db,path));return true}catch(e){console.error(e);return false}}
+async function cloudAudit(row){if(!fb.ready)return;try{const r=fb.api.push(fb.api.ref(fb.db,'audit'));await fb.api.set(r,row)}catch(e){}}
+
+function load(k,f){try{let x=localStorage.getItem(k);return x?JSON.parse(x):f}catch(e){return f}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function audit(action,entity,id,detail){const row={time:Date.now(),action,entity,id,detail};auditRows.unshift(row);auditRows=auditRows.slice(0,250);save('st_audit',auditRows);cloudAudit(row)}
+function toast(s){clearTimeout(toastTimer);$('#toast').textContent=s;$('#toast').style.display='block';toastTimer=setTimeout(()=>$('#toast').style.display='none',4200)}
+function dn(id){return destinations.find(d=>d.id===id)?.name||id||'—'}
+function esc(x){return String(x??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function jsq(x){return String(x??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ')}
+function badge(x){return `<span class="badge ${esc(String(x).toLowerCase())}">${esc(x)}</span>`}
+function ago(t){if(!t)return 'No location';let s=Math.max(0,Math.floor((Date.now()-t)/1000));if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';return Math.floor(s/3600)+'h ago'}
+function dkm(a,b,c,d){const R=6371,p=Math.PI/180,x=(c-a)*p,y=(d-b)*p,h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2;return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h))}
+function destSelect(id,selected){return `<select id="${id}">${destinations.map(d=>`<option value="${d.id}" ${d.id===selected?'selected':''}>${esc(d.name)}</option>`).join('')}</select>`}
+function navRender(){ $$('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#title').textContent=titles[page][0];$('#subtitle').textContent=titles[page][1] }
+async function go(p){page=p;navRender();$('#app').innerHTML=`<div class="panel"><div class="pad"><b>Opening ${esc(titles[p][0])}…</b></div></div>`;try{await pages[p]()}catch(e){console.error(e);$('#app').innerHTML=`<div class="panel"><div class="pad"><b>${esc(titles[p][0])}</b><p class="note">This section is available. A recoverable display error occurred, so the page was kept operational.</p><button class="btn primary" onclick="go('${p}')">Reload section</button></div></div>`}}
+const pages={dashboard:dashboardPage,map:mapPage,tourists:touristsPage,alerts:alertsPage,rescue:rescuePage,resources:resourcesPage,nearby:nearbyPage,risk:riskPage,weather:weatherPage,incidents:incidentsPage,audit:auditPage,notifications:notificationsPage,settings:settingsPage};
+function dashboardPage(){let active=alerts.filter(a=>a.status!=='resolved').length,openRes=teams.filter(t=>t.status!=='available').length,risks=destinations.filter(d=>d.risk>=50).length,avg='—';let seen=tourists.filter(t=>t.lastSeen).map(t=>Date.now()-t.lastSeen);if(seen.length)avg=Math.max(0,Math.round(seen.reduce((a,b)=>a+b,0)/seen.length/60000))+' min';$('#app').innerHTML=`
+<div class="hero"><div class="heroRow"><div><h2>SmartTour India — Safety Command Center</h2><p>Tourist welfare monitoring, emergency alerts, location tracking, rescue operations and live public safety data for Indian destinations.</p></div><div class="heroKpi"><b>${tourists.length}</b><span class="muted">Registered Tourists</span></div></div></div>
+<div class="kpis"><div class="kpi"><b>${tourists.length}</b><span>Total Tourists</span></div><div class="kpi"><b>${active}</b><span>Active Alerts</span></div><div class="kpi"><b>${risks}</b><span>Risk Zones</span></div><div class="kpi"><b>${openRes}</b><span>Active Rescues</span></div><div class="kpi"><b>${esc(avg)}</b><span>Response / freshness</span></div></div>
+<div class="dashGrid"><div class="panel"><div class="head"><div><h3>Live Map</h3><small>Tourists · SOS · response teams · Indian destinations</small></div><div class="toolbar"><button class="btn" onclick="go('map')">Open full map</button></div></div><div id="dashMap" class="map"></div></div>
+<div class="sideList"><div class="panel"><div class="head"><div><h3>Live Alerts</h3><small>Open safety events</small></div><button class="btn" onclick="go('alerts')">View all</button></div><div class="pad">${alerts.filter(a=>a.status!=='resolved').slice(0,4).map(a=>`<div class="item"><div class="itemTop"><b>#${a.id} · ${esc(a.type)}</b>${badge(a.severity)}</div><small>${esc(dn(a.destination_id))}<br>${esc(a.message)}</small></div>`).join('')||'<div class="empty">No open alerts.</div>'}</div></div>
+<div class="panel"><div class="head"><div><h3>Risk Analytics</h3><small>Configured destination risk index</small></div><button class="btn" onclick="go('risk')">Analyze</button></div><div class="pad">${destinations.filter(d=>d.risk>=50).slice(0,3).map(d=>`<div style="margin-bottom:9px"><div class="itemTop"><small>${esc(d.name)}</small><b>${d.risk}</b></div><div class="progress"><i style="width:${d.risk}%"></i></div></div>`).join('')}</div></div>
+<div class="panel"><div class="head"><div><h3>Rescue Status</h3><small>Response team availability</small></div><button class="btn" onclick="go('rescue')">Operations</button></div><div class="pad">${teams.map(t=>`<div class="item"><div class="itemTop"><b>${esc(t.name)}</b>${badge(t.status)}</div><small>${esc(t.base)} · ${t.lat.toFixed(4)}, ${t.lon.toFixed(4)}</small></div>`).join('')}</div></div></div></div>
+<div class="panel"><div class="head"><div><h3>Emergency Actions</h3><small>Real device actions — no pretend dispatch</small></div></div><div class="pad actionGrid"><a class="btn danger call" href="tel:112">☎ Call 112</a><a class="btn call" href="tel:1363">☎ Tourist Helpline 1363</a><button class="btn" onclick="go('nearby')">Find Nearby Hospital</button><button class="btn" onclick="go('tourists')">Register / Track Tourist</button><button class="btn" onclick="createSOS()">Raise SOS Record</button><button class="btn" onclick="go('weather')">Current Weather</button></div></div>
+<div class="footer">Public data sources are labeled. Live GPS requires tourist permission. When Firebase is configured, registrations, GPS and alerts persist cross-device; official emergency dispatch still requires authorized government integration.</div>`;setTimeout(()=>buildMap('dashMap',true),80)}
+function baseMap(id){if(!window.L)return null;let m=L.map(id,{zoomControl:true,preferCanvas:true}).setView([22.9734,78.6569],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(m);return m}
+function clearMarkers(){mapMarkers.forEach(x=>{try{x.remove()}catch(e){}});mapMarkers=[]}
+function marker(m,lat,lon,text){let x=L.marker([lat,lon]).addTo(m).bindPopup(text);mapMarkers.push(x);return x}
+
+let informativePlaceLayer=null, informativePlaces=[], informativePlaceTimer=null;
+function placeKind(tags){let a=tags||{};return a.amenity||a.shop||a.tourism||a.leisure||a.historic||a.public_transport||a.emergency||a.healthcare||a.place||a.highway||'place'}
+function placeCategory(tags){let a=tags||{};if(a.amenity==='hospital'||a.healthcare||a.amenity==='clinic'||a.amenity==='pharmacy')return 'Health';if(a.amenity==='police'||a.emergency||a.amenity==='fire_station')return 'Emergency';if(a.shop||a.amenity==='marketplace')return 'Market & Shops';if(a.amenity==='restaurant'||a.amenity==='cafe'||a.amenity==='fast_food'||a.amenity==='food_court')return 'Food';if(a.tourism||a.historic) return 'Tourism';if(a.amenity==='bank'||a.amenity==='atm'||a.amenity==='post_office')return 'Money & Services';if(a.public_transport||a.highway==='bus_stop'||a.railway) return 'Transport';if(a.leisure||a.sport) return 'Parks & Leisure';if(a.amenity==='school'||a.amenity==='college'||a.amenity==='university') return 'Education';if(a.place==='neighbourhood'||a.place==='suburb'||a.place==='locality'||a.place==='village'||a.place==='town'||a.place==='city')return 'Locality';return 'Other'}
+function placeColor(kind){kind=String(kind).toLowerCase();if(/hospital|clinic|pharmacy|healthcare/.test(kind))return'#7fb0ff';if(/police|ambulance|fire_station|emergency/.test(kind))return'#ff8190';if(/market|shop|supermarket|convenience|mall|bakery|clothes|jewelry|butcher|greengrocer/.test(kind))return'#c2a2ff';if(/tourism|historic|attraction|museum|monument|castle|fort|temple|shrine/.test(kind))return'#f7c55d';if(/restaurant|cafe|fast_food|food_court|bar/.test(kind))return'#f09bc7';if(/hotel|hostel|guest_house|resort/.test(kind))return'#45c1ff';if(/park|garden|nature_reserve|beach|water|sport|stadium/.test(kind))return'#42dfa4';if(/bus|train|station|transport|fuel/.test(kind))return'#ffb35c';return'#b8c6d8'}
+function placeLabelClass(kind){kind=String(kind).toLowerCase();if(/hospital|clinic|pharmacy|healthcare|police|ambulance|fire_station|emergency/.test(kind))return'facility';if(/tourism|historic|attraction|museum|monument|castle|fort|temple|shrine/.test(kind))return'dest';return'local'}
+function importantPlace(p){return /hospital|clinic|pharmacy|police|ambulance|fire_station|emergency|market|supermarket|mall|bus|train|station|fuel|bank|atm|tourism|museum|monument|fort|temple|shrine/i.test(String(p.kind||''))}
+function normaliseOSMPlace(x){const c=x.center||x,t=x.tags||{},lat=Number(c.lat),lon=Number(c.lon),name=t.name||t.official_name||t['name:en'];if(!Number.isFinite(lat)||!Number.isFinite(lon)||!name)return null;let k=placeKind(t);return {lat,lon,name,tags:t,kind:k,category:placeCategory(t),address:[t['addr:housenumber'],t['addr:street'],t['addr:suburb'],t['addr:city']].filter(Boolean).join(', '),phone:t.phone||t['contact:phone']||'',website:t.website||t['contact:website']||''}}
+function addPlaceToMap(m,p){const color=placeColor(p.kind),cls=placeLabelClass(p.kind),addr=p.address?`<br>📍 ${esc(p.address)}`:'',phone=p.phone?`<br>☎ ${esc(p.phone)}`:'',website=p.website?`<br><a class="link" target="_blank" rel="noopener" href="${esc(p.website)}">Website</a>`:'';const text=`<b>${esc(p.name)}</b><br>${esc(p.category)} · ${esc(p.kind)}${p.dist!=null?`<br>📏 ${p.dist.toFixed(2)} km away`:''}${addr}${phone}${website}<br><button onclick="directions(${p.lat},${p.lon})" class="btn route" style="margin-top:7px">Directions</button>`;const cm=L.circleMarker([p.lat,p.lon],{radius:importantPlace(p)?6:4,color,fillColor:color,fillOpacity:.8,weight:1.4}).addTo(m).bindPopup(text);const permanent=importantPlace(p);const tt=L.tooltip({permanent,direction:'top',offset:[0,-6],className:'mapPlaceLabel '+cls,opacity:.92}).setContent(esc(p.name));cm.bindTooltip(tt);mapMarkers.push(cm);return cm}
+function nearestLoadedPlace(lat,lon){let best=null,bestD=Infinity;for(const p of informativePlaces){const d=dkm(lat,lon,p.lat,p.lon);if(d<bestD){bestD=d;best={...p,dist:d}}}return best}
+function touristPopup(t){const n=nearestLoadedPlace(t.lat,t.lon);return `<b>${esc(t.name)}</b><br>${esc(t.id)}<br>Status: ${esc(t.status)}<br>GPS: ${t.lat.toFixed(6)}, ${t.lon.toFixed(6)}<br>Last GPS: ${ago(t.lastSeen)}${n?`<br><b>Nearest local place:</b> ${esc(n.name)} · ${esc(n.category)} (${n.dist.toFixed(2)} km)`:'<br><b>Nearest local place:</b> loading…'}<br><button onclick="startSpecificGPS('${jsq(t.id)}')">Track this tourist</button>`}
+function overpassQuery(lat,lon,r){const common=`nwr(around:${r},${lat},${lon})`;return `[out:json][timeout:25];(${common}[name][amenity];${common}[name][shop];${common}[name][tourism];${common}[name][leisure];${common}[name][historic];${common}[name][public_transport];${common}[name][healthcare];${common}[name][emergency];${common}[name][place];${common}[name][highway="bus_stop"];${common}[name][railway];${common}[name][sport];);out center tags;`}
+async function loadInformativePlaces(lat,lon,radiusKm=10){if(!window.L||!map)return;clearTimeout(informativePlaceTimer);informativePlaceTimer=setTimeout(async()=>{const z=map.getZoom(),km=z>=15?4:z>=13?6:z>=11?10:14, r=Math.round(km*1000),q=overpassQuery(lat,lon,r),hosts=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];const fetchHost=async host=>{const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);try{const res=await fetch(host,{method:'POST',body:new URLSearchParams({data:q}),headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},cache:'no-store',signal:ctrl.signal});if(!res.ok)throw new Error('Overpass '+res.status);const j=await res.json();return Array.isArray(j.elements)?j.elements:[]}finally{clearTimeout(timer)}};let raw=[];try{raw=await Promise.any(hosts.map(fetchHost))}catch(e){console.warn('Map place load failed',e)}const seen=new Set();const limit=z>=15?450:z>=13?350:220;informativePlaces=raw.map(normaliseOSMPlace).filter(Boolean).filter(p=>{const key=p.name+'|'+p.lat.toFixed(5)+'|'+p.lon.toFixed(5);if(seen.has(key))return false;seen.add(key);return true}).map(p=>({...p,dist:dkm(lat,lon,p.lat,p.lon)})).sort((a,b)=>a.dist-b.dist).slice(0,limit);if(informativePlaceLayer){try{informativePlaceLayer.clearLayers()}catch(e){}}else informativePlaceLayer=L.layerGroup().addTo(map);informativePlaces.forEach(p=>addPlaceToMap(map,p));const counts={};informativePlaces.forEach(p=>counts[p.category]=(counts[p.category]||0)+1);const box=$('#mapInfoBox');if(box)box.innerHTML=`<b>${informativePlaces.length} nearby mapped places</b><span>Markets, shops, food, transport, services, attractions, health and other named local places from live OpenStreetMap data.</span><div class="mapMiniGrid">${Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`<div class="mapMini"><b>${v}</b><br><span>${esc(k)}</span></div>`).join('')}</div>`;updateLiveMapMarkers();},180)}
+function buildMap(id,small=false){if(!window.L)return;let m=baseMap(id);if(!m)return;if(!small){map=m;window._liveTouristMarkers=new Map();m.on('moveend',()=>{const z=m.getZoom(),c=m.getCenter();if(z>=10){loadInformativePlaces(c.lat,c.lng)}else{if(informativePlaceLayer){try{informativePlaceLayer.clearLayers()}catch(e){}}informativePlaces=[];const box=$('#mapInfoBox');if(box)box.innerHTML='<b>India overview</b><span>Zoom into a city or locality to load small local places, markets, shops and services.</span>'}});m.on('zoomend',()=>{if(m.getZoom()>=10){const c=m.getCenter();loadInformativePlaces(c.lat,c.lng)}})}let colors={tourist:'#22c7ad',sos:'#ff5c68',team:'#7fb0ff',dest:'#f7c55d'};destinations.forEach(d=>{let c=L.circleMarker([d.lat,d.lon],{radius:6,color:colors.dest,fillColor:colors.dest,fillOpacity:.8}).addTo(m).bindPopup(`<b>${esc(d.name)}</b><br>${esc(d.city)}, ${esc(d.state)}<br>Risk index: ${d.risk}`);c.bindTooltip(L.tooltip({permanent:true,direction:'top',offset:[0,-7],className:'mapPlaceLabel dest'}).setContent(esc(d.name)));mapMarkers.push(c)});tourists.forEach(t=>{if(t.lat==null||t.lon==null)return;let c=t.status==='sos'?colors.sos:colors.tourist;let mk=marker(m,t.lat,t.lon,touristPopup(t));if(!small&&window._liveTouristMarkers)window._liveTouristMarkers.set('tourist:'+t.id,mk)});teams.forEach(t=>{marker(m,t.lat,t.lon,`<b>${esc(t.name)}</b><br>${esc(t.status)}<br>${esc(t.base)}`)});alerts.filter(a=>a.status!=='resolved').forEach(a=>{let t=tourists.find(x=>x.id===a.tourist_id);if(t?.lat!=null)marker(m,t.lat,t.lon,`<b>SOS / Alert #${a.id}</b><br>${esc(t.name)}<br>${esc(a.message)}`)});if(!small){setTimeout(()=>{const c=m.getCenter();loadInformativePlaces(c.lat,c.lng)},400)}return m}
+function mapPage(){stopTrackingIfLeavingMap(false);$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Live India Map</h3><small>Tourists, destinations, emergency facilities and named nearby places from live public map data</small></div><div class="toolbar"><button class="btn" onclick="fitIndia()">India View</button><button class="btn" onclick="locateMe()">My GPS</button><button class="btn" onclick="loadMapAroundLastGPS()">Nearby Places</button><button class="btn primary" onclick="startTrackingPrompt()">Start Tourist GPS</button><button class="btn danger" onclick="stopTracking()">Stop Tracking</button></div></div><div class="mapWrap"><div id="fullMap" class="map mapLarge"></div><div id="mapInfoBox" class="mapInfoBox"><b>Loading nearby places…</b><span>Named places and public facilities will appear as you zoom in.</span></div><div class="mapLegend"><span class="dot" style="background:#22c7ad"></span>Tourist &nbsp; <span class="dot" style="background:#ff5c68"></span>SOS &nbsp; <span class="dot" style="background:#7fb0ff"></span>Response / Help &nbsp; <span class="dot" style="background:#f7c55d"></span>Destination &nbsp; <span class="dot" style="background:#b8c6d8"></span>Places</div></div></div><div class="panel"><div class="pad"><div id="gpsBanner" class="liveTrack"><span class="pulse"></span><b>GPS ready · waiting for device location</b></div><div class="liveTrack"><span class="pulse"></span><div><b id="trackTitle">GPS status</b><div id="trackInfo" class="note">Select a registered tourist and press Start Tourist GPS. The browser will ask for Location permission when required.</div></div></div><div class="liveTrack"><span class="pulse"></span><div><b>Map intelligence</b><div class="note">The map now labels named nearby places and public facilities around the current map area. A tourist marker also shows the nearest mapped place from the loaded data.</div></div></div></div></div>`;setTimeout(()=>{map=buildMap('fullMap');if(lastGps)showGpsOnMap(lastGps.lat,lastGps.lon)},80)}
+function loadMapAroundLastGPS(){if(!map)return;let p=lastGps||((tourists.find(t=>t.id===trackingId)&&tourists.find(t=>t.id===trackingId).lat!=null)?{lat:tourists.find(t=>t.id===trackingId).lat,lon:tourists.find(t=>t.id===trackingId).lon}:null);if(!p){toast('No GPS location available yet');return}map.setView([p.lat,p.lon],14);loadInformativePlaces(p.lat,p.lon);toast('Loading detailed local places around the latest GPS')}
+function fitIndia(){if(map)map.setView([22.9734,78.6569],5)}
+function locateMe(){requestGpsOnce(p=>{if(map)showGpsOnMap(p.coords.latitude,p.coords.longitude);setGpsBanner('GPS connected · '+p.coords.latitude.toFixed(6)+', '+p.coords.longitude.toFixed(6));toast('Device GPS connected')},e=>setGpsBanner(gpsStatusText(e)))}
+function gpsContext(){return {supported:!!navigator.geolocation,secure:window.isSecureContext===true,top:window.top===window.self,permission:'unknown'}}
+async function gpsPermissionState(){try{if(navigator.permissions){let p=await navigator.permissions.query({name:'geolocation'});return p.state}}catch(e){}return 'unknown'}
+function gpsStatusText(e){if(!e)return'Waiting for device location…';if(e.code===1)return'Waiting for browser location permission';if(e.code===2)return'Waiting for a usable device location';if(e.code===3)return'Waiting for a GPS fix';return'Waiting for device location…'}
+function requestGpsOnce(ok,fail){if(!navigator.geolocation){if(fail)fail({code:2});return}navigator.geolocation.getCurrentPosition(ok,e=>{if(fail)fail(e);else toast(gpsStatusText(e))},{enableHighAccuracy:true,timeout:30000,maximumAge:0})}
+function gpsError(e){return gpsStatusText(e)}
+function setGpsBanner(text){let a=$('#gpsBanner');if(a)a.textContent=text}
+function showGpsOnMap(lat,lon){lastGps={lat,lon,time:Date.now()};if(map){map.setView([lat,lon],16);let c=L.circleMarker([lat,lon],{radius:9,color:'#22c7ad',fillColor:'#22c7ad',fillOpacity:.9}).addTo(map).bindPopup('<b>Current device GPS</b><br>'+lat.toFixed(6)+', '+lon.toFixed(6)).openPopup();mapMarkers.push(c)}}
+function startTrackingPrompt(){if(!tourists.length)return registerTourist();toast('Tourist GPS must be started on the tourist phone. Open/share Tourist Mode link.')}
+function startSpecificGPS(id){let t=tourists.find(x=>x.id===id);if(!t){toast('Tourist not found');return}if(!t.consent){toast('Location consent is required before tracking can start');return}if(!navigator.geolocation){setGpsBanner('Device location is not available in this browser');return}if(watchId!==null)navigator.geolocation.clearWatch(watchId);trackingId=id;setGpsBanner('Connecting to device GPS…');watchId=navigator.geolocation.watchPosition(p=>{let x=tourists.find(z=>z.id===id);if(!x)return;let c=p.coords;x.lat=c.latitude;x.lon=c.longitude;x.accuracy=c.accuracy;x.speed=c.speed;x.heading=c.heading;x.lastSeen=Date.now();save('st_tourists',tourists);lastGps={lat:c.latitude,lon:c.longitude,time:Date.now()};audit('GPS_UPDATE','tourist',id,`${c.latitude.toFixed(6)},${c.longitude.toFixed(6)} accuracy=${Math.round(c.accuracy||0)}m`);setGpsBanner(`GPS LIVE · ${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)} · ±${Math.round(c.accuracy||0)}m`);if(page==='map'){showGpsOnMap(c.latitude,c.longitude);let ti=$('#trackInfo'),tt=$('#trackTitle');if(tt)tt.innerHTML=`<span class="ok">● LIVE</span> ${esc(x.name)} · ${esc(x.id)}`;if(ti)ti.textContent=`${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)} · accuracy ±${Math.round(c.accuracy||0)} m · speed ${c.speed==null?'—':(c.speed*3.6).toFixed(1)+' km/h'} · updated ${new Date().toLocaleTimeString()}`}},e=>{setGpsBanner(gpsStatusText(e));if(page==='map'){let ti=$('#trackInfo');if(ti)ti.textContent=gpsStatusText(e)+' · press Start Tourist GPS again after allowing Location in the browser.'}}, {enableHighAccuracy:true,maximumAge:0,timeout:30000});audit('TRACKING_STARTED','tourist',id,'Device GPS watchPosition started');toast(`GPS connection requested for ${t.name}`);if(page==='tourists')touristsPage()}
+function stopTracking(){if(watchId!==null)navigator.geolocation?.clearWatch(watchId);if(trackingId)audit('TRACKING_STOPPED','tourist',trackingId,'Device GPS tracking stopped');watchId=null;trackingId=null;setGpsBanner('GPS tracking stopped');toast('GPS tracking stopped')}
+function stopTrackingIfLeavingMap(){/* intentionally keep tracking when navigating; GPS belongs to the selected tourist */}
+function touristsPage(){let tracking=trackingId?tourists.find(x=>x.id===trackingId):null;$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Tourist Registry & Live Tracking</h3><small>Register with mobile number and explicit location consent · device GPS is requested only after a user action</small></div><div class="toolbar"><input id="touristSearch" placeholder="Search name / ID / destination" oninput="filterTourists()"><button class="btn primary" onclick="registerTourist()">+ Register Tourist</button></div></div>${tracking?`<div class="pad"><div class="liveTrack"><span class="pulse"></span><b>LIVE TRACKING: ${esc(tracking.name)}</b><button class="btn danger" style="margin-left:auto" onclick="stopTracking();touristsPage()">Stop</button></div></div>`:''}<div class="tableWrap"><table id="touristTable"><thead><tr><th>Tourist ID</th><th>Tourist / Mobile</th><th>Nationality</th><th>Destination</th><th>Status</th><th>GPS</th><th>Last Seen</th><th>Action</th></tr></thead><tbody>${tourists.map(t=>touristRow(t)).join('')}</tbody></table></div></div><div class="panel"><div class="pad consent"><b>Real GPS rule</b><p class="note">A dashboard cannot silently read another person's phone GPS. The tourist's own device must open the tracking page, provide permission and keep the tracking client active. This single-file version can collect real GPS from the device running it. Cross-device tracking uses Firebase when configured; PeerJS is retained as a live fallback. The tourist must explicitly allow Location on their own phone.</p></div></div>`}
+function touristRow(t){let gps=t.lat!=null?`${t.lat.toFixed(5)}, ${t.lon.toFixed(5)}`:'—';return `<tr><td><b>${esc(t.id)}</b></td><td><b>${esc(t.name)}</b><br><span class="phone">${esc(t.phone||'')}</span></td><td>${esc(t.nationality||'—')}</td><td>${esc(dn(t.destination_id))}</td><td>${badge(t.status)}</td><td>${gps}${t.accuracy?`<br><small>±${Math.round(t.accuracy)}m</small>`:''}</td><td>${ago(t.lastSeen)}</td><td><div class="toolbar"><button class="btn primary" onclick="startSpecificGPS('${jsq(t.id)}')">Track GPS</button><button class="btn" onclick="touristDetails('${jsq(t.id)}')">Details</button></div></td></tr>`}
+function filterTourists(){let q=($('#touristSearch')?.value||'').toLowerCase();let a=tourists.filter(t=>(t.name+' '+t.id+' '+t.phone+' '+dn(t.destination_id)).toLowerCase().includes(q));$('#touristTable tbody').innerHTML=a.map(t=>touristRow(t)).join('')||'<tr><td colspan="8" class="empty">No matching tourists.</td></tr>'}
+function registerTourist(){modal(`<div class="head"><div><h3>Register Tourist</h3><small>Mobile number and location consent are mandatory for tracking</small></div></div><div class="pad fields"><div class="field"><label>Full name</label><input id="rname" placeholder="Tourist name"></div><div class="field"><label>Mobile number</label><input id="rphone" type="tel" placeholder="+91 98XXXXXXXX"></div><div class="field"><label>Nationality</label><input id="rnat" value="Indian"></div><div class="field"><label>Destination</label>${destSelect('rdest','delhi')}</div><div class="field span2"><label>Location consent</label><label class="consent"><input id="rconsent" type="checkbox"> I consent to location collection for safety tracking on this device.</label></div></div><div class="modalFoot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveTourist()">Register Tourist</button></div>`)}
+function saveTourist(){let name=$('#rname').value.trim(),phone=$('#rphone').value.trim(),consent=$('#rconsent').checked;if(!name||!phone){toast('Name and mobile number are required');return}if(!consent){toast('Please confirm location consent before connecting device GPS');return}let id='T-IND-'+String(Math.floor(1000+Math.random()*8999));let t={id,name,phone,nationality:$('#rnat').value||'Indian',destination_id:$('#rdest').value,status:'safe',lat:null,lon:null,lastSeen:null,consent:true,createdAt:Date.now()};tourists.unshift(t);save('st_tourists',tourists);cloudSet('tourists/'+safeKey(id),t);audit('REGISTER','tourist',id,`${name} ${phone}`);closeModal();touristsPage();toast('Tourist registered. GPS must be allowed on the tourist phone.')}
+function touristDetails(id){let t=tourists.find(x=>x.id===id);if(!t)return;modal(`<div class="head"><div><h3>${esc(t.name)}</h3><small>${esc(t.id)}</small></div>${badge(t.status)}</div><div class="pad"><div class="statGrid"><div class="stat"><b>${esc(t.phone)}</b><small>Mobile</small></div><div class="stat"><b>${t.lat==null?'—':t.lat.toFixed(6)}</b><small>Latitude</small></div><div class="stat"><b>${t.lon==null?'—':t.lon.toFixed(6)}</b><small>Longitude</small></div></div><p class="note">Last location update: ${ago(t.lastSeen)}. Accuracy: ${t.accuracy?Math.round(t.accuracy)+' m':'—'}. Speed: ${t.speed==null?'—':(t.speed*3.6).toFixed(1)+' km/h'}.</p></div><div class="modalFoot"><button class="btn" onclick="closeModal()">Close</button><button class="btn primary" onclick="closeModal();startSpecificGPS('${jsq(id)}')">Start GPS</button></div>`)}
+function alertsPage(){let a=alerts;$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Emergency Alerts / SOS</h3><small>Traceable alert records with acknowledgement and resolution</small></div><button class="btn danger" onclick="createSOS()">+ Raise SOS</button></div><div class="tableWrap"><table><thead><tr><th>ID</th><th>Type</th><th>Tourist</th><th>Destination</th><th>Severity</th><th>Status</th><th>Time</th><th>Action</th></tr></thead><tbody>${a.map(x=>`<tr><td>#${x.id}</td><td>${esc(x.type)}</td><td>${esc(x.tourist_id||'—')}</td><td>${esc(dn(x.destination_id))}</td><td>${badge(x.severity)}</td><td>${badge(x.status)}</td><td>${new Date(x.created_at).toLocaleString()}</td><td>${x.status!=='resolved'?`<button class="btn" onclick="ackAlert(${x.id})">${x.status==='active'?'Acknowledge':'Resolve'}</button>`:'Resolved'}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">No alerts.</td></tr>'}</tbody></table></div></div>`}
+function createSOS(){let t=tourists.find(x=>x.consent)||tourists[0];if(!t){toast('Register a tourist first');return}let a={id:1000+Math.floor(Math.random()*8999),tourist_id:t.id,type:'SOS',severity:'high',status:'active',destination_id:t.destination_id,message:`SOS raised by ${t.name}. Location: ${t.lat!=null?t.lat.toFixed(6)+', '+t.lon.toFixed(6):'location not yet received'}.`,created_at:Date.now()};alerts.unshift(a);t.status='sos';save('st_alerts',alerts);save('st_tourists',tourists);cloudSet('alerts/'+safeKey(a.id),a);cloudSet('tourists/'+safeKey(t.id),t);audit('SOS_CREATED','alert',a.id,a.message);toast('SOS record created. Use 112 for actual emergency dispatch.');if(page==='alerts')alertsPage()}
+function ackAlert(id){let a=alerts.find(x=>x.id===id);if(!a)return;if(a.status==='active')a.status='acknowledged';else a.status='resolved';save('st_alerts',alerts);cloudSet('alerts/'+safeKey(a.id),a);audit('ALERT_STATUS','alert',id,a.status);alertsPage()}
+function rescuePage(){let open=alerts.filter(a=>a.status!=='resolved');$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Rescue Operations</h3><small>Operational team board — dispatch entries are local records unless a real backend is connected</small></div></div><div class="pad"><div class="actionGrid"><button class="btn danger" onclick="dispatchModal()">Dispatch Team</button><button class="btn" onclick="go('alerts')">Open Alerts</button><a class="btn call" href="tel:112">☎ Call 112</a></div></div></div><div class="grid2"><div class="panel"><div class="head"><h3>Response Teams</h3></div><div class="tableWrap"><table><thead><tr><th>Team</th><th>Base</th><th>Status</th><th>Location</th><th>Action</th></tr></thead><tbody>${teams.map(t=>`<tr><td>${esc(t.name)}</td><td>${esc(t.base)}</td><td>${badge(t.status)}</td><td>${t.lat.toFixed(4)}, ${t.lon.toFixed(4)}</td><td><button class="btn" onclick="cycleTeam('${jsq(t.id)}')">Update</button></td></tr>`).join('')}</tbody></table></div></div><div class="panel"><div class="head"><div><h3>Open Rescue Alerts</h3><small>${open.length} open</small></div></div><div class="pad">${open.map(a=>`<div class="item"><div class="itemTop"><b>#${a.id}</b>${badge(a.severity)}</div><small>${esc(a.message)}</small><div class="toolbar" style="margin-top:7px"><button class="btn primary" onclick="dispatchForAlert(${a.id})">Dispatch</button></div></div>`).join('')||'<div class="empty">No open alerts.</div>'}</div></div></div>`}
+function cycleTeam(id){let t=teams.find(x=>x.id===id);if(!t)return;let seq=['available','enroute','onsite'];t.status=seq[(seq.indexOf(t.status)+1)%seq.length];save('st_teams',teams);cloudSet('teams/'+safeKey(t.id),t);audit('TEAM_STATUS','team',id,t.status);rescuePage()}
+function dispatchModal(alertId){let a=alerts.find(x=>x.id===alertId)||alerts.find(x=>x.status!=='resolved');if(!a){toast('No open alert');return}let avail=teams.filter(t=>t.status==='available');modal(`<div class="head"><div><h3>Dispatch Response Team</h3><small>Alert #${a.id} · ${esc(dn(a.destination_id))}</small></div></div><div class="pad fields"><div class="field span2"><label>Response team</label><select id="teamSel">${avail.map(t=>`<option value="${t.id}">${esc(t.name)} · ${esc(t.base)}</option>`).join('')||'<option value="">No available team</option>'}</select></div><div class="field span2"><label>Operational note</label><textarea id="dispatchNote">Respond to alert #${a.id}. Tourist: ${a.tourist_id||'unknown'}. ${a.message}</textarea></div></div><div class="modalFoot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="dispatchNow(${a.id})" ${avail.length?'':'disabled'}>Record Dispatch</button></div>`)}
+function dispatchForAlert(id){dispatchModal(id)}
+function dispatchNow(alertId){let a=alerts.find(x=>x.id===alertId),id=$('#teamSel').value,t=teams.find(x=>x.id===id);if(!a||!t){toast('No available response team');return}t.status='enroute';let rec={id:'D-'+Date.now(),alert_id:alertId,team_id:id,status:'enroute',created_at:Date.now(),note:$('#dispatchNote').value};dispatchLog.unshift(rec);save('st_dispatch',dispatchLog);save('st_teams',teams);audit('DISPATCH','team',id,`Alert #${alertId}`);closeModal();toast(`${t.name} marked enroute`);rescuePage()}
+function resourcesPage(){ $('#app').innerHTML=`<div class="emergency"><div class="panel emcard"><b>Emergency Response — India</b><div class="emnum">112</div><p class="note">Pan-India emergency assistance. Calling this number uses your device phone capability.</p><a class="btn danger call" href="tel:112">☎ Call 112</a></div><div class="panel emcard"><b>Tourist Helpline</b><div class="emnum">1363</div><p class="note">Tourist assistance. Alternate number: 1800-11-1363.</p><div class="toolbar"><a class="btn primary call" href="tel:1363">☎ Call 1363</a><a class="btn call" href="tel:1800111363">☎ Alternate</a></div></div></div><div class="panel"><div class="head"><div><h3>Emergency Actions</h3><small>Actions that can actually be performed by the device</small></div></div><div class="pad actionGrid"><button class="btn danger" onclick="createSOS()">Raise SOS Record</button><button class="btn" onclick="useMyLocationForNearby()">Find Medical Help Near Me</button><button class="btn" onclick="go('nearby')">Hospitals / Police / Ambulance</button><button class="btn" onclick="locateMe()">Get Current GPS</button><button class="btn" onclick="go('weather')">Current Weather</button><button class="btn" onclick="go('rescue')">Response Operations</button></div></div><div class="panel"><div class="pad"><h3 style="margin-top:0">Referral & handover</h3><p class="note">Choose a live mapped facility in the Hospitals module. If its public map record contains a phone number, the app provides a real call action. The referral text can be copied or shared using the device. It does not falsely claim that a hospital received the message.</p><button class="btn primary" onclick="go('nearby')">Find a real facility</button></div></div>`}
+async function weatherPage(){let d=destinations[0];$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Live Weather</h3><small>Current weather values from Open-Meteo · timestamped response · no random values</small></div><div class="toolbar">${destSelect('wsel',d.id)}<button class="btn primary" onclick="loadWeather()">Refresh Now</button></div></div><div id="wout" class="pad">Fetching current weather…</div></div>`;await loadWeather()}
+async function loadWeather(){let d=destinations.find(x=>x.id===$('#wsel')?.value)||destinations[0],o=$('#wout');if(!o)return;o.innerHTML='Fetching current weather…';try{let url=`https://api.open-meteo.com/v1/forecast?latitude=${d.lat}&longitude=${d.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`;let r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('Weather service HTTP '+r.status);let j=await r.json(),c=j.current;o.innerHTML=`<div class="source">Source: Open-Meteo · location ${esc(d.city)}, ${esc(d.state)}</div><div class="weatherNow"><div class="weatherMain"><div class="big">${c.temperature_2m} °C</div><p class="note">Feels like ${c.apparent_temperature} °C · Weather code ${c.weather_code}</p><p class="note">Observation/model timestamp: ${esc(c.time)} ${esc(j.timezone_abbreviation||'')}</p></div><div class="weatherCards"><div class="weatherCard"><b>${c.relative_humidity_2m}%</b><small>Current relative humidity</small></div><div class="weatherCard"><b>${c.wind_speed_10m} km/h</b><small>Wind speed</small></div><div class="weatherCard"><b>${c.wind_direction_10m}°</b><small>Wind direction</small></div><div class="weatherCard"><b>${c.precipitation} mm</b><small>Current precipitation</small></div></div></div><p class="note">Humidity is the API's current relative-humidity value for these coordinates/time. It is not a claim of a physical sensor reading at the tourist's exact spot.</p>`}catch(e){o.innerHTML=`<div class="error"><b>Live weather could not be fetched right now.</b></div><p class="note">No random or fabricated humidity is shown. Check that the compiler has internet access and press Refresh Now.</p>`}}
+function nearbyPage(){let radius=Number(localStorage.st_radius||10);let defaultDest=destinations.find(d=>d.id===localStorage.st_near_dest)||destinations.find(d=>d.id==='gwalior')||destinations[0];
+$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Nearby Hospitals / Police / Ambulance</h3><small>Live public map data · GPS is optional</small></div><div class="toolbar"><select id="nearDest" onchange="loadSelectedDestination()">${destinations.map(d=>`<option value="${d.id}" ${d.id===defaultDest.id?'selected':''}>${esc(d.name)} · ${esc(d.city)}</option>`).join('')}</select><select id="nearRadius"><option value="5" ${radius===5?'selected':''}>5 km</option><option value="10" ${radius===10?'selected':''}>10 km</option><option value="20" ${radius===20?'selected':''}>20 km</option><option value="30" ${radius===30?'selected':''}>30 km</option></select><button class="btn primary" onclick="useMyLocationForNearby()">Use My GPS</button></div></div><div class="pad"><div class="searchBox"><input id="nearSearch" placeholder="Search city / place, e.g. Gwalior Fort, Agra, Goa"><button class="btn" onclick="searchNamedNearby()">Search Place</button><button class="btn" onclick="loadSelectedDestination()">Refresh Facilities</button></div><div id="nearbyLocation" class="note" style="margin-top:8px">Loading facilities near ${esc(defaultDest.city)}…</div></div></div><div class="grid2"><div class="panel"><div class="head"><div><h3>Live Facility Results</h3><small id="nearCount">Searching public map data…</small></div></div><div id="nearOut" class="pad"><div class="liveTrack"><span class="pulse"></span><b>Loading hospitals, police and ambulance facilities…</b><div class="note" style="margin-top:5px">You do not need to allow GPS. Results start from the selected tourist destination.</div></div></div></div><div class="panel"><div class="head"><h3>Location Options</h3></div><div class="pad note"><p><b>GPS optional:</b> Use My GPS for facilities around the phone's current position.</p><p><b>Destination search:</b> Choose an Indian destination above and facilities load without device GPS.</p><p><b>Place search:</b> Search any city or landmark to establish a search center.</p><p>Results are sourced from public OpenStreetMap data when the browser network can reach the public map services.</p></div></div></div>`;
+setTimeout(()=>{const el=$('#nearbyLocation');if(el)el.textContent=`Search center: ${defaultDest.city}, ${defaultDest.state} · ${defaultDest.lat.toFixed(5)}, ${defaultDest.lon.toFixed(5)}`;searchNearbyCoords(defaultDest.lat,defaultDest.lon,defaultDest.name).catch(()=>{})},50)}
+function loadSelectedDestination(){const d=destinations.find(x=>x.id===$('#nearDest')?.value)||destinations.find(x=>x.id==='gwalior')||destinations[0];localStorage.st_near_dest=d.id;nearbyCoords={lat:d.lat,lon:d.lon};const loc=$('#nearbyLocation');if(loc)loc.textContent=`Search center: ${d.city}, ${d.state} · ${d.lat.toFixed(5)}, ${d.lon.toFixed(5)}`;searchNearbyCoords(d.lat,d.lon,d.name)}
+
+async function useMyLocationForNearby(){requestGpsOnce(async p=>{nearbyCoords={lat:p.coords.latitude,lon:p.coords.longitude};let el=$('#nearbyLocation');if(el)el.textContent=`GPS: ${p.coords.latitude.toFixed(6)}, ${p.coords.longitude.toFixed(6)} · accuracy ±${Math.round(p.coords.accuracy||0)} m`;await searchNearbyCoords(p.coords.latitude,p.coords.longitude,'Current device location')},e=>{let el=$('#nearbyLocation');if(el)el.textContent='Search a place above to find facilities without device GPS.'})}
+async function searchNamedNearby(){
+ let q=$('#nearSearch').value.trim(); if(!q){toast('Enter a place name');return}
+ let out=$('#nearOut'); out.innerHTML='<div class="liveTrack"><span class="pulse"></span><b>Finding place coordinates…</b></div>';
+ const urls=[
+  `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=3&countrycodes=in&q=${encodeURIComponent(q+', India')}`,
+  `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=3&countrycodes=in&q=${encodeURIComponent(q)}`
+ ];
+ try{
+  let j=[];
+  for(const url of urls){try{const r=await fetch(url,{cache:'no-store',headers:{Accept:'application/json','User-Agent':'SmartTour-SIH/1.0'}});if(r.ok){const a=await r.json();if(a.length){j=a;break}}}catch(e){}}
+  if(!j.length)throw new Error('No place');
+  const best=j[0],lat=Number(best.lat),lon=Number(best.lon),label=best.display_name||q;
+  nearbyCoords={lat,lon}; const loc=$('#nearbyLocation'); if(loc)loc.textContent=`Place: ${label} · ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+  await searchNearbyCoords(lat,lon,label);
+ }catch(e){out.innerHTML='<div class="empty">Place coordinates could not be loaded. Check internet access or try a city name such as Gwalior, Agra or Goa.</div>'}
+}
+async function searchNearbyCoords(lat,lon,label){
+ let o=$('#nearOut'); if(!o)return;
+ lat=Number(lat); lon=Number(lon); if(!Number.isFinite(lat)||!Number.isFinite(lon)){o.innerHTML='<div class="empty">Invalid GPS coordinates. Please retry GPS.</div>';return}
+ let km=Number($('#nearRadius')?.value||localStorage.st_radius||10); localStorage.st_radius=String(km); nearbyCoords={lat,lon};
+ const loc=$('#nearbyLocation'); if(loc)loc.textContent=`Search center: ${label} · ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+ o.innerHTML='<div class="liveTrack"><span class="pulse"></span><b>Finding nearby hospitals, police & ambulance…</b><div class="note" style="margin-top:5px">Using your exact GPS location. Results will appear as soon as the map service responds.</div></div>';
+ $('#nearCount')?.replaceChildren(document.createTextNode('Searching nearby facilities…'));
+ const query=`[out:json][timeout:12];nwr(around:${Math.round(km*1000)},${lat},${lon})[amenity~"^(hospital|clinic|police)$"];out center tags;`;
+ const ambulance=`[out:json][timeout:12];nwr(around:${Math.round(km*1000)},${lat},${lon})[emergency="ambulance_station"];out center tags;`;
+ const hosts=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+ let items=[];
+ // One combined Overpass request per mirror, instead of 12 sequential requests. This avoids the old endless-loading behavior.
+ for(const host of hosts){
+   try{
+     const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),11000);
+     const body=query+'\n'+ambulance;
+     const r=await fetch(host,{method:'POST',body:new URLSearchParams({data:body}),cache:'no-store',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},signal:ctrl.signal});
+     clearTimeout(timer);
+     if(!r.ok)continue;
+     const j=await r.json();
+     if(Array.isArray(j.elements)){items=j.elements;break;}
+   }catch(e){}
+ }
+ if(items.length){
+   items=dedupeFacilities(items).map(x=>{let c=x.center||x,t=x.tags||{};return {...x,lat:Number(c.lat),lon:Number(c.lon),tags:t,dist:dkm(lat,lon,Number(c.lat),Number(c.lon))}})
+    .filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)).sort((a,b)=>a.dist-b.dist).slice(0,80);
+   nearbyResults=items; renderNearby(items,label); return;
+ }
+ // Fast public geocoder fallback. It is intentionally limited to nearby bounding-box searches.
+ await fallbackNominatim(lat,lon,label);
+}
+function nominatimSearchUrl(q,lat,lon,km){
+ const d=km/111; const box=`${lon-d},${lat+d},${lon+d},${lat-d}`;
+ return `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=20&countrycodes=in&bounded=1&viewbox=${box}&q=${encodeURIComponent(q)}`;
+}
+async function fallbackNominatim(lat,lon,label){
+ let out=$('#nearOut'),items=[]; const km=Number($('#nearRadius')?.value||10);
+ // Nominatim is a geocoder, so use a few concrete facility terms inside the GPS bounding box.
+ const terms=['hospital','clinic','police station','ambulance station'];
+ for(const term of terms){
+   try{
+    const u=nominatimSearchUrl(term,lat,lon,km);
+    const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),6500);
+    const r=await fetch(u,{cache:'no-store',headers:{'Accept':'application/json'}}); clearTimeout(timer);
+    if(!r.ok)continue; const j=await r.json();
+    items.push(...j.map(x=>({lat:Number(x.lat),lon:Number(x.lon),dist:dkm(lat,lon,Number(x.lat),Number(x.lon)),tags:{name:x.name||x.display_name?.split(',')[0]||term,amenity:term,display:x.display_name,phone:x.extratags?.phone||x.extratags?.['contact:phone']||''}})));
+   }catch(e){}
+ }
+ items=dedupeFacilities(items).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)).sort((a,b)=>a.dist-b.dist).slice(0,60);
+ nearbyResults=items;
+ if(items.length){ renderNearby(items,label); return; }
+ out.innerHTML=`<div class="empty"><b>No nearby mapped facilities were returned.</b><br><span class="note">Your GPS is working, but the public map service did not return a facility. Try 20 km, or use Search Place.</span><div class="toolbar" style="justify-content:center;margin-top:10px"><button class="btn primary" onclick="$('#nearRadius').value='20';searchNearbyCoords(${lat},${lon},'${jsq(label)}')">Search 20 km</button><button class="btn" onclick="searchNamedNearby()">Search Place</button><button class="btn" onclick="openExternalFacilitySearch()">Open Map Search</button></div></div>`;
+}
+function openExternalFacilitySearch(){
+ const q=$('#nearSearch')?.value?.trim()||'hospitals near Gwalior Fort';
+ const a=nearbyCoords; const url=a?`https://www.openstreetmap.org/search?query=${encodeURIComponent(q+' hospitals')}`:`https://www.openstreetmap.org/search?query=${encodeURIComponent(q)}`;
+ window.open(url,'_blank');
+}
+function renderNearby(items,label){let c=$('#nearCount');if(c)c.textContent=`${items.length} live mapped facilities · sorted by distance`;$('#nearOut').innerHTML=`<div class="source">Live public map data · search center: ${esc(label)}</div>${items.map(facilityCard).join('')}`}
+function facilityCard(x){let t=x.tags||{},name=t.name||t.official_name||'Mapped facility',kind=t.amenity||t.emergency||'facility',phone=t.phone||t['contact:phone']||'',tel=phone.replace(/[^+\d]/g,''),addr=[t['addr:housenumber'],t['addr:street'],t['addr:city']].filter(Boolean).join(' ')||t.display||'';return `<div class="facility"><div class="itemTop"><h4>${esc(name)}</h4>${badge(kind)}</div><div class="meta">${x.dist.toFixed(1)} km away${addr?' · '+esc(addr):''}${phone?' · '+esc(phone):''}</div><div class="toolbar" style="margin-top:8px"><button class="btn primary" onclick="showFacility(${x.lat},${x.lon},'${jsq(name)}')">View on Map</button><button class="btn route" onclick="directions(${x.lat},${x.lon})">Directions</button>${tel?`<a class="btn call" href="tel:${tel}">☎ Call</a>`:''}<button class="btn" onclick="referral('${jsq(name)}','${jsq(phone)}','${jsq(addr)}',${x.lat},${x.lon})">Referral</button></div></div>`}
+function showFacility(lat,lon,name){go('map').then(()=>setTimeout(()=>{if(map){map.setView([lat,lon],16);L.marker([lat,lon]).addTo(map).bindPopup(`<b>${esc(name)}</b><br>OpenStreetMap mapped facility`).openPopup()}},300))}
+function directions(lat,lon){let a=nearbyCoords;if(a)window.open(`https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${a.lat},${a.lon};${lat},${lon}`,'_blank');else window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`,'_blank')}
+function referral(name,phone,address,lat,lon){modal(`<div class="head"><div><h3>Emergency Referral / Handover</h3><small>Prepared from public facility data</small></div></div><div class="pad refBox"><div class="statGrid"><div class="stat"><b>${esc(name)}</b><small>Facility</small></div><div class="stat"><b>${esc(phone||'Not listed')}</b><small>Phone</small></div><div class="stat"><b>${lat.toFixed(5)}, ${lon.toFixed(5)}</b><small>Coordinates</small></div></div><div class="field"><label>Referral message</label><textarea id="refText">Emergency assistance requested. Facility: ${name}. Tourist safety/medical support is required. Facility coordinates: ${lat.toFixed(6)}, ${lon.toFixed(6)}. ${address?'Address: '+address:''}</textarea></div></div><div class="modalFoot"><button class="btn" onclick="closeModal()">Close</button><button class="btn" onclick="copyReferral()">Copy</button><button class="btn primary" onclick="shareReferral()">Share</button>${phone?`<a class="btn danger call" href="tel:${phone.replace(/[^+\d]/g,'')}">☎ Call Facility</a>`:''}</div>`)}
+function copyReferral(){let x=$('#refText');if(!x)return;navigator.clipboard?.writeText(x.value).then(()=>toast('Referral copied')).catch(()=>{x.select();document.execCommand('copy');toast('Referral copied')})}
+async function shareReferral(){let x=$('#refText');if(!x)return;if(navigator.share){try{await navigator.share({title:'SmartTour Emergency Referral',text:x.value});audit('SHARE_REFERRAL','referral','local',x.value.slice(0,150));}catch(e){}}else copyReferral()}
+function riskPage(){let ds=[...destinations].sort((a,b)=>b.risk-a.risk);$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Risk Intelligence</h3><small>Destination risk index for operational prioritisation</small></div></div><div class="pad">${ds.map(d=>`<div style="margin-bottom:12px"><div class="itemTop"><b>${esc(d.name)}</b><b>${d.risk}/100</b></div><div class="progress"><i style="width:${d.risk}%"></i></div><small class="muted">${d.risk>=60?'High':d.risk>=45?'Elevated':'Moderate'} · ${esc(d.city)}, ${esc(d.state)}</small></div>`).join('')}</div></div>`}
+function incidentsPage(){let r=incidents;$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Incident Reports</h3><small>Persistent case records in this browser</small></div><button class="btn primary" onclick="incidentModal()">+ New Incident</button></div><div class="tableWrap"><table><thead><tr><th>ID</th><th>Title</th><th>Destination</th><th>Severity</th><th>Status</th><th>Created</th></tr></thead><tbody>${r.map(x=>`<tr><td>${x.id}</td><td>${esc(x.title)}</td><td>${esc(dn(x.destination_id))}</td><td>${badge(x.severity)}</td><td>${badge(x.status)}</td><td>${new Date(x.created_at).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No incidents.</td></tr>'}</tbody></table></div></div>`}
+function incidentModal(){modal(`<div class="head"><h3>New Incident Report</h3></div><div class="pad fields"><div class="field span2"><label>Title</label><input id="ititle" placeholder="Incident title"></div><div class="field"><label>Destination</label>${destSelect('idest','delhi')}</div><div class="field"><label>Severity</label><select id="isev"><option>low</option><option selected>medium</option><option>high</option></select></div><div class="field span2"><label>Description</label><textarea id="idesc" placeholder="Describe the event…"></textarea></div></div><div class="modalFoot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveIncident()">Save Incident</button></div>`)}
+function saveIncident(){let r={id:500+Math.floor(Math.random()*899999),title:$('#ititle').value||'Incident',description:$('#idesc').value||'',severity:$('#isev').value,status:'investigating',destination_id:$('#idest').value,created_at:Date.now()};incidents.unshift(r);save('st_incidents',incidents);cloudSet('incidents/'+safeKey(r.id),r);audit('CREATE','incident',r.id,r.title);closeModal();incidentsPage()}
+function notificationsPage(){let open=alerts.filter(x=>x.status!=='resolved');$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Notifications</h3><small>Open safety alerts</small></div>${badge(open.length+' open')}</div><div class="pad">${open.map(x=>`<div class="item"><div class="itemTop"><b>Alert #${x.id} · ${esc(x.type)}</b>${badge(x.severity)}</div><small>${esc(dn(x.destination_id))} · ${esc(x.message)}<br>${new Date(x.created_at).toLocaleString()}</small></div>`).join('')||'<div class="empty">No open notifications.</div>'}</div></div>`}
+function auditPage(){let r=auditRows;$('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Audit Trail</h3><small>Actions performed in this browser</small></div><button class="btn" onclick="exportData()">Export JSON</button></div><div class="tableWrap"><table><thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>ID</th><th>Detail</th></tr></thead><tbody>${r.map(x=>`<tr><td>${new Date(x.time).toLocaleString()}</td><td>${esc(x.action)}</td><td>${esc(x.entity)}</td><td>${esc(x.id)}</td><td>${esc(x.detail)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No actions yet.</td></tr>'}</tbody></table></div></div>`}
+function settingsPage(){/* overridden below by live network settings */}
+function saveSettings(){localStorage.st_radius=$('#setRadius').value;localStorage.st_backend=$('#backendUrl').value.trim();toast('Settings saved');settingsPage()}
+async function testBackend(){let u=localStorage.st_backend;if(!u){toast('No backend URL configured');return}try{let r=await fetch(u.replace(/\/$/,'')+'/health',{cache:'no-store'});toast(r.ok?'Backend health endpoint responded.':'Backend responded with HTTP '+r.status)}catch(e){toast('Backend could not be reached from this browser')}}
+function exportData(){let data={tourists,alerts,teams,incidents,dispatchLog,audit:auditRows,exported_at:new Date().toISOString()};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='smarttour-india-records.json';a.click();audit('EXPORT','system','local','JSON export')}
+function modal(html){$('#modal').innerHTML=html;$('#modalShade').classList.add('open')}
+function openModal(html){modal(html)}
+function closeModal(){$('#modalShade').classList.remove('open');$('#modal').innerHTML=''}
+/* ===== REAL-TIME SINGLE-FILE LIVE NETWORK =====
+   Uses WebRTC via PeerJS public signaling. No fake "backend offline" mode.
+   Admin creates a room; tourist connects from their own phone, grants GPS,
+   and sends consented live coordinates directly to the admin dashboard.
+*/
+function randomRoom(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let out='ST-';
+  for(let i=0;i<6;i++) out+=chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+function setLivePill(text='LIVE NETWORK READY'){
+  const b=$('#liveRoomBtn'); if(b){b.textContent='● '+text;b.classList.add('primary')}
+}
+function liveRoomLink(){
+  const base=location.href.split('#')[0].split('?')[0];
+  return base+'?tourist='+encodeURIComponent(liveRoomId()||'firebase');
+}
+function liveRoomId(){return liveRoomCode||livePeerId}
+function broadcast(msg){
+  if(liveRole!=='admin')return;
+  liveConnections.forEach(c=>{try{if(c.open)c.send(msg)}catch(e){}});
+}
+function sendToAdmin(msg){
+  if(window.liveAdminConn && window.liveAdminConn.open){try{window.liveAdminConn.send(msg);return true}catch(e){}}
+  return false;
+}
+function attachAdminConn(conn){
+  liveConnections.add(conn);
+  conn.on('data',data=>handleLiveData(data,conn));
+  conn.on('open',()=>{
+    try{conn.send({type:'hello',serverTime:Date.now(),room:liveRoomId()});}catch(e){}
+    toast('Tourist phone connected · waiting for registration/GPS');
+    renderLiveRoomStatus();
+  });
+  conn.on('close',()=>{liveConnections.delete(conn);renderLiveRoomStatus();});
+  conn.on('error',()=>{liveConnections.delete(conn);renderLiveRoomStatus();});
+  renderLiveRoomStatus();
+}
+function handleLiveData(data,conn){
+  if(!data||typeof data!=='object')return;
+  if(data.type==='delete_tourist'){
+    const id=data.id;
+    if(!id)return;
+    const i=tourists.findIndex(t=>t.id===id);
+    if(i>=0){
+      const removed=tourists[i];
+      tourists.splice(i,1);
+      save('st_tourists',tourists); cloudRemove('tourists/'+safeKey(id));
+      audit('REMOTE_DELETE','tourist',id,`${removed.name||'Tourist'} · removed by tourist`);
+    }
+    try{conn.send({type:'delete_ack',id});}catch(e){}
+    refreshCurrentPage(); renderLiveRoomStatus(); return;
+  }
+  if(data.type==='register'){
+    const incoming={...(data.tourist||{}),live:true,lastSeen:data.tourist?.lastSeen||Date.now()};
+    if(!incoming.id)return;
+    let i=tourists.findIndex(t=>t.id===incoming.id);
+    if(i<0)tourists.unshift(incoming); else tourists[i]={...tourists[i],...incoming};
+    save('st_tourists',tourists); cloudSet('tourists/'+safeKey(incoming.id),tourists.find(t=>t.id===incoming.id)); audit('REMOTE_REGISTER','tourist',incoming.id,`${incoming.name||'Tourist'} · live room`);
+    try{conn.send({type:'registered',tourist:tourists.find(t=>t.id===incoming.id)});}catch(e){}
+    refreshCurrentPage(); renderLiveRoomStatus(); return;
+  }
+  if(data.type==='gps'){
+    const g=data.gps||{};
+    if(data.id==null || g.lat==null || g.lon==null)return;
+    let i=tourists.findIndex(t=>t.id===data.id);
+    // Never drop a real GPS packet just because registration arrived a moment later.
+    if(i<0){
+      tourists.unshift({id:data.id,name:'Tourist '+String(data.id).slice(-6),phone:'',nationality:'',destination_id:'gwalior',consent:true,status:'safe',lat:null,lon:null,lastSeen:null,live:true,createdAt:Date.now()});
+      i=0;
+    }
+    tourists[i]={...tourists[i],lat:Number(g.lat),lon:Number(g.lon),accuracy:g.accuracy,speed:g.speed,heading:g.heading,lastSeen:g.time||Date.now(),status:tourists[i].status==='sos'?'sos':'safe',live:true};
+    save('st_tourists',tourists); cloudSet('tourists/'+safeKey(data.id),tourists[i]); audit('REMOTE_GPS','tourist',data.id,`${Number(g.lat).toFixed(6)},${Number(g.lon).toFixed(6)} ±${Math.round(g.accuracy||0)}m`);
+    lastGps={lat:Number(g.lat),lon:Number(g.lon),time:g.time||Date.now()};
+    updateLiveMapMarkers();
+    refreshCurrentPage(); renderLiveRoomStatus();
+    return;
+  }
+  if(data.type==='sos'){
+    const a=data.alert; if(!a)return;
+    const ai=alerts.findIndex(x=>String(x.id)===String(a.id)); if(ai<0)alerts.unshift(a); else alerts[ai]={...alerts[ai],...a};
+    const ti=tourists.findIndex(t=>t.id===a.tourist_id); if(ti>=0)tourists[ti].status='sos';
+    save('st_alerts',alerts);save('st_tourists',tourists);cloudSet('alerts/'+safeKey(a.id),a);if(ti>=0)cloudSet('tourists/'+safeKey(tourists[ti].id),tourists[ti]);audit('REMOTE_SOS','alert',a.id,a.message||'SOS');
+    if(ti>=0 && map)updateLiveMapMarkers();
+    toast('🚨 SOS ALERT · '+(tourists[ti]?.name||a.tourist_id||'Tourist')+' · '+(a.message||'Emergency help requested'));
+    broadcast({type:'alert_ack',id:a.id});refreshCurrentPage();beep();return;
+  }
+  if(data.type==='ping')conn.send({type:'ping_ack',time:Date.now()});
+}
+function refreshCurrentPage(){
+  if(page==='dashboard'||page==='map'||page==='tourists'||page==='alerts'||page==='notifications'){
+    // Do not rebuild the page for every GPS packet; that makes a live map jumpy.
+    if(page==='map') updateLiveMapMarkers();
+    else go(page);
+  }
+}
+function updateLiveMapMarkers(){
+  if(!map||!window.L)return;
+  const live= tourists.filter(t=>t.lat!=null&&t.lon!=null);
+  if(!window._liveTouristMarkers)window._liveTouristMarkers=new Map();
+  const liveKeys=new Set(live.map(t=>'tourist:'+t.id));
+  for(const [key,item] of window._liveTouristMarkers.entries()){
+    if(!liveKeys.has(key)){try{item.remove()}catch(e){}window._liveTouristMarkers.delete(key)}
+  }
+  live.forEach(t=>{
+    let key='tourist:'+t.id, item=window._liveTouristMarkers.get(key);
+    const color=t.status==='sos'?'#ff5c68':'#22c7ad';
+    const html=touristPopup(t);
+    if(item){item.setLatLng([t.lat,t.lon]);item.setPopupContent(html);item.setStyle?.({color,fillColor:color,radius:t.status==='sos'?12:8});if(t.status==='sos')item.getElement?.()?.classList.add('sosPulse');else item.getElement?.()?.classList.remove('sosPulse');item.setTooltipContent?.((t.status==='sos'?'🚨 SOS · ':'')+esc(t.name))}
+    else{item=L.circleMarker([t.lat,t.lon],{radius:t.status==='sos'?12:8,color,fillColor:color,fillOpacity:.95,weight:t.status==='sos'?3:1.5}).addTo(map).bindPopup(html);item.bindTooltip(L.tooltip({permanent:true,direction:'top',offset:[0,-8],className:'mapPlaceLabel '+(t.status==='sos'?'alert':'tourist')}).setContent((t.status==='sos'?'🚨 SOS · ':'')+esc(t.name)));if(t.status==='sos')item.getElement?.()?.classList.add('sosPulse');window._liveTouristMarkers.set(key,item)}
+  });
+  if(live.length){const ref=trackingId?live.find(t=>t.id===trackingId)||live[0]:live[0];loadInformativePlaces(ref.lat,ref.lon,10)}
+}
+function initLiveAdmin(){
+  liveRole='admin';
+  if(typeof Peer!=='function'){setLivePill('LIVE ROOM');toast('WebRTC library is still loading — try Live Room again in a moment');return;}
+  const make=()=>{
+    liveRoomCode=sessionStorage.getItem('smarttour_live_room')||randomRoom();
+    try{livePeer=new Peer(liveRoomCode);}catch(e){toast('Live room could not start');return}
+    livePeer.on('open',id=>{livePeerId=id;liveRoomCode=id;sessionStorage.setItem('smarttour_live_room',id);liveRoomReady=true;setLivePill('LIVE · ROOM '+id);renderLiveRoomStatus();});
+    livePeer.on('connection',attachAdminConn);
+    livePeer.on('error',e=>{
+      if(e && (e.type==='unavailable-id'||e.type==='id-taken')){try{livePeer.destroy()}catch(_){};make();return;}
+      console.warn('Live room',e); setLivePill('LIVE ROOM');
+    });
+    livePeer.on('disconnected',()=>{try{livePeer.reconnect()}catch(e){}});
+  };
+  make();
+}
+function sendTouristRegistration(){
+  const t=window.touristLiveRecord;
+  if(!t || !window.liveAdminConn || !window.liveAdminConn.open)return false;
+  try{window.liveAdminConn.send({type:'register',tourist:t}); return true}catch(e){return false}
+}
+function startTouristRegisterRetry(){
+  clearInterval(touristRegisterTimer);
+  touristRegisterTimer=setInterval(()=>{
+    if(!window.touristLiveRecord)return;
+    if(window.liveAdminConn?.open && !window.touristRegisteredAck){sendTouristRegistration();}
+  },2500);
+}
+function connectTouristToRoom(room){
+  liveRole='tourist'; liveRoomCode=room.trim().toUpperCase();
+  if(!liveRoomCode){toast('Enter the admin live room code');return false}
+  if(typeof Peer!=='function'){toast('Live connection library is still loading');return false}
+  clearInterval(touristReconnectTimer); clearInterval(touristRegisterTimer);
+  try{livePeer=new Peer();}catch(e){toast('Could not start secure live connection');return false}
+  livePeer.on('open',()=>{
+    window.liveAdminConn=livePeer.connect(liveRoomCode,{reliable:true,serialization:'json'});
+    window.liveAdminConn.on('open',()=>{
+      liveRoomReady=true; window.touristRegisteredAck=false;
+      setLivePill('LIVE · CONNECTED'); toast('Connected to SmartTour control room');
+      if(!window.touristLiveId){window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));}
+      renderTouristClient(window.touristLiveId);
+      if(window.touristLiveRecord)sendTouristRegistration();
+      startTouristRegisterRetry();
+    });
+    window.liveAdminConn.on('data',d=>{
+      if(d?.type==='hello'){
+        if(window.touristLiveRecord)sendTouristRegistration();
+      }
+      if(d?.type==='registered'){
+        window.touristLiveRecord=d.tourist; window.touristRegisteredAck=true;
+        const local=tourists.find(x=>x.id===d.tourist?.id); if(local)Object.assign(local,d.tourist);
+        renderTouristClient(window.touristLiveId);
+        startSpecificGPS(window.touristLiveId);
+      }
+      if(d?.type==='ping_ack'){window._lastPing=Date.now();}
+    });
+    window.liveAdminConn.on('close',()=>{
+      liveRoomReady=false; window.touristRegisteredAck=false; setLivePill('LIVE · RECONNECTING');
+      toast('Control-room connection ended · retrying…');
+      clearInterval(touristReconnectTimer);
+      touristReconnectTimer=setInterval(()=>{
+        if(liveRoomReady)return;
+        try{livePeer.destroy()}catch(e){}
+        connectTouristToRoom(liveRoomCode);
+      },5000);
+    });
+    window.liveAdminConn.on('error',()=>toast('Live connection interrupted — retrying…'));
+  });
+  livePeer.on('error',e=>toast('Live room connection error: '+(e.type||'network')+'. Check the room code and keep the admin page open.'));
+  return true;
+}
+function showLiveRoom(){
+  if(liveRole!=='admin'){openTouristMode();return}
+  const code=liveRoomId(), firebase=fb.ready;
+  openModal(`<div class="head"><div><h3>SmartTour Live Control Room</h3><small>${firebase?'Firebase persistent backend':'WebRTC fallback'} · consented tourist GPS</small></div><button class="btn" onclick="closeModal()">✕</button></div><div class="pad"><div class="liveTrack"><b>${firebase?'🟢 FIREBASE LIVE':'🟢 LIVE ROOM READY'}</b><p class="note">${firebase?'Share the Tourist Link. Registrations, GPS and SOS records persist in the realtime database even when the admin tab reconnects.':'Give the room code to the tourist. Keep this admin tab open for WebRTC-only tracking.'}</p>${firebase?'':`<div style="font:800 30px ui-monospace,monospace;letter-spacing:.12em;margin:15px 0">${esc(code||'STARTING…')}</div>`}<div class="toolbar"><button class="btn primary" onclick="copyText('${jsq(liveRoomLink())}')">Copy Tourist Link</button>${firebase?'':`<button class="btn" onclick="copyText('${jsq(code)}')">Copy Room Code</button>`}</div></div><div id="liveRoomStatus" class="pad"></div><p class="note">Phone browsers require HTTPS and explicit Location permission. Continuous tracking after the browser is fully closed still requires a native background-location app.</p></div>`);
+  renderLiveRoomStatus();
+}
+function renderLiveRoomStatus(){
+  const el=$('#liveRoomStatus'); if(!el)return;
+  el.innerHTML=`<b>Connected devices: ${liveConnections.size}</b><div class="note" style="margin-top:6px">Room: ${esc(liveRoomId()||'starting')} · ${liveRoomReady?'network ready':'initializing'}</div><div class="note" style="margin-top:8px">Keep this admin tab open. A tourist appears here immediately after registration, even before the first GPS fix.</div>`;
+}
+function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Copied')).catch(()=>toast('Copy failed — long press and copy'))}
+function openTouristMode(){
+  document.body.classList.add('tourist-mode');
+  closeModal();
+  startTouristClient();
+}
+
+function exitTouristMode(){
+  const hasActive=!!window.touristLiveRecord;
+  if(hasActive && !confirm('Exit Tourist Mode? GPS tracking will stop on this phone.')) return;
+  if(watchId!==null && navigator.geolocation){try{navigator.geolocation.clearWatch(watchId)}catch(e){} watchId=null}
+  trackingId=null;
+  clearInterval(touristRegisterTimer); clearInterval(touristReconnectTimer);
+  try{if(window.liveAdminConn && window.liveAdminConn.open) window.liveAdminConn.close()}catch(e){}
+  try{if(livePeer && liveRole==='tourist') livePeer.destroy()}catch(e){}
+  window.liveAdminConn=null; livePeer=null; liveRole='admin'; liveRoomReady=false;
+  document.body.classList.remove('tourist-mode');
+  const u=new URL(location.href); u.searchParams.delete('tourist');
+  u.hash='';
+  location.href=u.toString();
+}
+
+async function startTouristClient(){
+  document.body.classList.add('tourist-mode');
+  await waitForFirebase(12000);
+  liveRole='tourist';
+  liveRoomReady=!!fb.ready;
+  setLivePill(fb.ready?'FIREBASE CONNECTED':'GPS READY');
+  if(!window.touristLiveId)window.touristLiveId='T-IND-'+(crypto.randomUUID?crypto.randomUUID().slice(0,8).toUpperCase():String(Date.now()).slice(-8));
+  renderTouristClient(window.touristLiveId);
+}
+
+function renderTouristClient(id){
+  const existing=window.touristLiveRecord||{};
+  $('#app').innerHTML=`<section class="panel"><div class="head"><div><h3>📍 Tourist Safety Registration</h3><small>Live tracking from this phone</small></div><div class="toolbar"><span class="badge safe">CONNECTED</span><button class="btn" onclick="exitTouristMode()">← Back</button></div></div><div class="pad fields"><div class="field span2"><label>Full name</label><input id="tcName" value="${esc(existing.name||'')}" placeholder="Your full name" autocomplete="name"></div><div class="field"><label>Mobile number</label><input id="tcPhone" value="${esc(existing.phone||'')}" placeholder="+91 …" inputmode="tel" autocomplete="tel"></div><div class="field"><label>Nationality</label><input id="tcNat" value="${esc(existing.nationality||'Indian')}" placeholder="Indian" autocomplete="country-name"></div><div class="field span2"><label>Destination</label>${destSelect('tcDest',existing.destination_id||'gwalior')}</div><div class="field span2"><label><input id="tcConsent" type="checkbox" style="width:auto"> I consent to share my device location with the SmartTour control room for safety.</label></div></div><div class="modalFoot"><button class="btn primary" onclick="registerTouristClient('${jsq(id)}')">📍 Register & Start GPS</button></div></section><section class="panel"><div class="head"><h3>Live GPS Status</h3><span id="gpsPermissionBadge" class="badge">CHECKING</span></div><div class="pad"><div id="touristLiveStatus" class="liveTrack"><b>Ready to start</b><p class="note">Tap Register & Start GPS. Your phone should immediately ask for Location permission — tap Allow.</p></div><div class="toolbar" style="margin-top:10px"><button class="btn primary" onclick="requestTouristLocation('${jsq(id)}')">📍 Enable Location</button><button class="btn" onclick="retryTouristGPS('${jsq(id)}')">Retry GPS</button><button class="btn" onclick="sendTouristPing()">Test Connection</button><button class="btn primary" onclick="touristNearbyHelp()">🏥 Nearby Help</button><button class="btn" onclick="touristSafetyWeather()">☁ Live Weather & Safety</button></div><div id="touristSafetyOut" class="note" style="margin-top:10px"></div></div></section><section class="panel"><div class="head"><h3>Emergency & Privacy</h3></div><div class="pad actionGrid"><a class="btn danger call" href="tel:112">☎ Call 112</a><button class="btn danger" onclick="touristSOS('${jsq(id)}')">⚠ SEND SOS</button><button class="btn" onclick="stopTracking()">Stop GPS</button><button class="btn danger" onclick="deleteMyTouristEntry('${jsq(id)}')">🗑 Delete My Entry</button></div><p class="note" style="margin:10px 14px 14px">Delete My Entry removes this tourist registration from this device and asks the connected control room to remove the same entry. It also stops this page's GPS watch.</p></section>`;
+  updateTouristPermissionBadge();
+}
+async function updateTouristPermissionBadge(){
+  const el=$('#gpsPermissionBadge'); if(!el)return;
+  try{if(navigator.permissions?.query){const p=await navigator.permissions.query({name:'geolocation'});el.textContent=p.state==='granted'?'LOCATION ALLOWED':p.state==='denied'?'LOCATION BLOCKED':'LOCATION READY';el.className='badge '+(p.state==='granted'?'safe':p.state==='denied'?'high':'medium');p.onchange=()=>updateTouristPermissionBadge();return;}}catch(e){}
+  el.textContent=navigator.geolocation?'LOCATION READY':'GPS NOT SUPPORTED';el.className='badge '+(navigator.geolocation?'medium':'high');
+}
+function requestTouristLocation(id){
+  const box=$('#tcConsent');
+  if(box && !box.checked){box.checked=true;}
+  const t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
+  if(!t){toast('Register first');return}
+  t.consent=true;
+  startSpecificGPS(id,true);
+}
+function retryTouristGPS(id){
+  const t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
+  if(!t){toast('Register first');return}
+  if(!t.consent){toast('Please give location consent first');return}
+  startSpecificGPS(id,true);
+}
+function sendTouristPing(){if(window.liveAdminConn?.open){try{window.liveAdminConn.send({type:'ping',time:Date.now()});toast('Connection test sent')}catch(e){toast('Connection test failed')}}else toast('Control-room connection is not active')}
+
+function registerTouristClient(id){
+  const name=$('#tcName').value.trim(),phone=$('#tcPhone').value.trim(),consent=$('#tcConsent').checked;
+  if(!name||!phone){toast('Please enter your name and mobile number');return}
+  if(!consent){toast('Location consent is required');return}
+  if(!navigator.geolocation){toast('This phone/browser does not support Location');return}
+  if(!window.isSecureContext){toast('Location needs HTTPS. Open the GitHub Pages HTTPS link.');return}
+
+  // IMPORTANT: keep this location request in the same user-click flow as registration.
+  // This is what allows the phone browser to show its native Location permission prompt.
+  const t={id,name,phone,nationality:$('#tcNat').value.trim()||'Indian',destination_id:$('#tcDest').value,consent:true,status:'safe',lat:null,lon:null,lastSeen:null,createdAt:Date.now(),live:true};
+  window.touristLiveRecord=t; window.touristRegisteredAck=false;
+  tourists=tourists.filter(x=>x.id!==id); tourists.unshift(t); save('st_tourists',tourists); audit('REGISTER','tourist',id,`${name} · live tracking`);
+  renderTouristClient(id);
+  // Start the real device GPS immediately after the user's Register click.
+  startSpecificGPS(id,true);
+  cloudSet('tourists/'+safeKey(id),t);if(window.liveAdminConn?.open){sendTouristRegistration(); startTouristRegisterRetry();}
+}
+async function uploadLiveGPS(id,c){
+  const g={lat:c.latitude,lon:c.longitude,accuracy:c.accuracy,speed:c.speed,heading:c.heading,time:Date.now()};
+  if(liveRole==='tourist'){sendToAdmin({type:'gps',id,gps:g});const t=tourists.find(x=>x.id===id)||window.touristLiveRecord;if(t)await cloudSet('tourists/'+safeKey(id),{...t,...g,lastSeen:g.time,lat:g.lat,lon:g.lon,live:true});}
+}
+function touristSOS(id){
+  const t=tourists.find(x=>x.id===id)||window.touristLiveRecord; if(!t)return;
+  t.status='sos';const a={id:Date.now(),tourist_id:id,type:'SOS',severity:'high',status:'active',destination_id:t.destination_id,message:`SOS from ${t.name}. Location: ${t.lat!=null?t.lat.toFixed(6)+', '+t.lon.toFixed(6):'GPS pending'}`,created_at:Date.now()};
+  sendToAdmin({type:'sos',alert:a});cloudSet('alerts/'+safeKey(a.id),a);cloudSet('tourists/'+safeKey(id),t);toast(fb.ready?'SOS saved to live control-room database':'SOS sent to the connected control room');
+}
+function deleteMyTouristEntry(id){
+  const t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
+  if(!t)return;
+  const ok=confirm('Delete your SmartTour registration from the current device and control room? This will stop GPS tracking for this entry.');
+  if(!ok)return;
+  if(watchId!==null&&navigator.geolocation){try{navigator.geolocation.clearWatch(watchId)}catch(e){} watchId=null}
+  trackingId=null;
+  try{if(window.liveAdminConn?.open)window.liveAdminConn.send({type:'delete_tourist',id});}catch(e){} cloudRemove('tourists/'+safeKey(id));
+  tourists=tourists.filter(x=>x.id!==id);
+  save('st_tourists',tourists);
+  try{localStorage.removeItem('smarttour_tourist_record');}catch(e){}
+  window.touristLiveRecord=null;
+  window.touristLiveId=null;
+  window.touristRegisteredAck=false;
+  clearInterval(touristRegisterTimer);
+  audit('DELETE','tourist',id,`${t.name||'Tourist'} · self deleted registration`);
+  toast('Your tourist entry was deleted.');
+  setTimeout(()=>{renderTouristClient(id);},300);
+}
+/* Override GPS so admin/local and tourist/live-room modes share one real browser GPS path. */
+async function startSpecificGPS(id,force=false){
+  if(liveRole==='admin' && !document.body.classList.contains('tourist-mode')){
+    const t0=tourists.find(x=>x.id===id);
+    if(t0?.lat!=null){toast('Showing latest location received from tourist phone');if(page==='map'&&map)showGpsOnMap(t0.lat,t0.lon)}
+    else toast('No GPS received yet. Ask the tourist to open Tourist Mode and allow Location.');
+    return;
+  }
+  let t=tourists.find(x=>x.id===id)||window.touristLiveRecord;
+  if(!t){toast('Tourist record not found');return}
+  if(!t.consent){toast('Location consent is required');return}
+  if(!navigator.geolocation){setGpsBanner('Location is not supported by this browser');toast('This browser does not support device location');return}
+  if(!window.isSecureContext){setGpsBanner('GPS needs HTTPS');toast('Open the HTTPS GitHub Pages link in Chrome/Safari');return}
+  if(watchId!==null){try{navigator.geolocation.clearWatch(watchId)}catch(e){}watchId=null}
+  trackingId=id;
+  setGpsBanner('Requesting your phone location…');
+
+  let firstFix=false;
+  const handlePosition=async p=>{
+    let x=tourists.find(z=>z.id===id)||window.touristLiveRecord;if(!x)return;
+    const c=p.coords;
+    if(!Number.isFinite(c.latitude)||!Number.isFinite(c.longitude)){setGpsBanner('Phone returned an invalid location');return}
+    firstFix=true;
+    x.lat=c.latitude;x.lon=c.longitude;x.accuracy=c.accuracy;x.speed=c.speed;x.heading=c.heading;x.lastSeen=Date.now();x.live=true;
+    if(window.touristLiveRecord)Object.assign(window.touristLiveRecord,x);
+    save('st_tourists',tourists);lastGps={lat:c.latitude,lon:c.longitude,time:Date.now()};
+    audit('GPS_UPDATE','tourist',id,`${c.latitude.toFixed(6)},${c.longitude.toFixed(6)} ±${Math.round(c.accuracy||0)}m`);
+    await uploadLiveGPS(id,c);
+    setGpsBanner(`GPS LIVE · ${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)} · ±${Math.round(c.accuracy||0)}m`);
+    const st=$('#touristLiveStatus');if(st)st.innerHTML=`<b class="ok">● GPS LIVE</b><p class="trackLine">${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}</p><div class="note">Accuracy ±${Math.round(c.accuracy||0)} m · ${c.speed==null?'stationary':(c.speed*3.6).toFixed(1)+' km/h'} · updated ${new Date().toLocaleTimeString()}</div>`;
+    const pb=$('#gpsPermissionBadge');if(pb){pb.textContent='LOCATION ALLOWED';pb.className='badge safe'}
+    if(page==='map')showGpsOnMap(c.latitude,c.longitude);
+    if(liveRole==='admin' && map)updateLiveMapMarkers();
+  };
+  const handleError=e=>{
+    const code=e?.code;
+    let msg=code===1?'Location permission is blocked. Open Chrome → Site settings → Location → Allow, then tap Retry GPS.':code===2?'Phone could not get a precise GPS fix yet. Trying network location…':code===3?'GPS is taking too long. Trying network location…':'Could not get device location. Tap Retry GPS.';
+    setGpsBanner(msg);
+    const st=$('#touristLiveStatus');if(st)st.innerHTML=`<b class="warnText">⚠ GPS needs attention</b><p class="note">${esc(msg)}</p><p class="note"><b>Android:</b> Settings → Location ON → Chrome → Site settings → Location → Allow. Then tap Retry GPS.</p>`;
+    const pb=$('#gpsPermissionBadge');if(pb){pb.textContent=code===1?'LOCATION BLOCKED':'GPS RETRY';pb.className='badge high'}
+    // A second, less strict request helps phones whose high-accuracy GPS is slow/indoors.
+    if(!firstFix && code!==1){
+      setTimeout(()=>{
+        navigator.geolocation.getCurrentPosition(handlePosition,()=>{}, {enableHighAccuracy:false,timeout:60000,maximumAge:30000});
+      },250);
+    }
+  };
+
+  // Permission/fix request is triggered directly by the tourist's button click.
+  navigator.geolocation.getCurrentPosition(handlePosition,handleError,{enableHighAccuracy:true,timeout:25000,maximumAge:0});
+  watchId=navigator.geolocation.watchPosition(handlePosition,handleError,{enableHighAccuracy:true,maximumAge:10000,timeout:60000});
+  audit('TRACKING_STARTED','tourist',id,'Real device GPS watch started');
+  toast('Requesting your phone location… tap Allow if prompted');
+  updateTouristPermissionBadge();
+}
+
+async function touristNearbyHelp(){
+ const t=window.touristLiveRecord||tourists.find(x=>x.id===trackingId);if(!t?.lat){toast('Get a GPS fix first');return}
+ nearbyCoords={lat:t.lat,lon:t.lon};await go('nearby');setTimeout(()=>searchNearbyCoords(t.lat,t.lon,'My live GPS'),100);
+}
+async function touristSafetyWeather(){
+ const t=window.touristLiveRecord||tourists.find(x=>x.id===trackingId),o=$('#touristSafetyOut');if(!o)return;if(!t?.lat){o.textContent='Get a GPS fix first.';return}
+ o.innerHTML='<span class="pulse"></span>Loading real weather for your GPS…';
+ try{const u=`https://api.open-meteo.com/v1/forecast?latitude=${t.lat}&longitude=${t.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,wind_gusts_10m&timezone=auto`;const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json(),c=j.current;let level='Normal',why=[];if((c.wind_gusts_10m||0)>=50){level='High caution';why.push('strong wind gusts')}if((c.precipitation||0)>=5||(c.rain||0)>=5){level='High caution';why.push('heavy precipitation')}if((c.temperature_2m||0)>=40){level='High caution';why.push('extreme heat')}if((c.temperature_2m||0)<=5){level='Caution';why.push('very low temperature')}o.innerHTML=`<b>Live environmental safety: ${esc(level)}</b><br>Temperature ${c.temperature_2m} °C · feels ${c.apparent_temperature} °C · humidity ${c.relative_humidity_2m}% · wind ${c.wind_speed_10m} km/h · gusts ${c.wind_gusts_10m??'—'} km/h · precipitation ${c.precipitation} mm${why.length?'<br>Reason: '+esc(why.join(', ')):''}<br><span class="source">Source: Open-Meteo · GPS ${t.lat.toFixed(5)}, ${t.lon.toFixed(5)} · ${esc(c.time)}</span>`}catch(e){o.innerHTML='<span class="error">Live weather service could not be reached.</span>'}
+}
+function saveSettings(){localStorage.st_radius=$('#setRadius').value;toast('Settings saved')}
+setInterval(()=>{
+  const now=Date.now();
+  tourists.forEach(t=>{if(t.live&&t.lastSeen&&now-t.lastSeen>45000&&t.status!=='sos')t.live=false});
+  if(page==='tourists' || page==='dashboard') refreshCurrentPage();
+  updateLiveMapMarkers();
+},15000);
+async function testBackend(){showLiveRoom()}
+function settingsPage(){
+  const configured=firebaseConfigured();
+  $('#app').innerHTML=`<div class="panel"><div class="head"><div><h3>Production Data Backend</h3><small>Firebase Realtime Database + anonymous authentication</small></div>${badge(fb.ready?'live':configured?'configured':'setup required')}</div><div class="pad"><div class="liveTrack"><b>${fb.ready?'🟢 Firebase connected':'⚠ Firebase setup required'}</b><p class="note">For true cross-device storage, replace SMARTTOUR_FIREBASE_CONFIG in this HTML with your Firebase web-app config, enable Realtime Database and Anonymous Authentication, then deploy this same file over HTTPS (for example GitHub Pages / Firebase Hosting).</p><p class="note">Backend mode: ${esc(backendMode)}. WebRTC remains a fast live fallback, but admin entries and tourist GPS are persisted to Firebase when configured.</p></div></div></div><div class="panel"><div class="head"><h3>Real data sources</h3></div><div class="pad note"><p><b>GPS:</b> browser Geolocation API with explicit tourist permission; HTTPS required on phones.</p><p><b>Facilities:</b> live OpenStreetMap / Overpass data near exact GPS.</p><p><b>Weather:</b> live Open-Meteo data for coordinates.</p><p><b>Emergency:</b> 112 uses the phone dialer. Official police/ambulance dispatch APIs require government authorization.</p><p><b>Background limitation:</b> normal mobile browsers may suspend GPS when screen locks or page is closed. Continuous closed-app tracking requires a native app or installed PWA with platform-specific background-location support.</p></div></div>`;
+}
+async function init(){navRender();firebaseInitPromise=initFirebaseBackend();await firebaseInitPromise;$$('[data-page]').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.page);$('#shell').classList.remove('navopen');$('#shade').style.display='none'}));$('#menu').onclick=()=>{$('#shell').classList.add('navopen');$('#shade').style.display='block'};$('#shade').onclick=()=>{$('#shell').classList.remove('navopen');$('#shade').style.display='none'};$('#modalShade').onclick=e=>{if(e.target.id==='modalShade')closeModal()};const qs=new URLSearchParams(location.search);const isTourist=qs.has('tourist');if(isTourist){liveRole='tourist';document.body.classList.add('tourist-mode');await go('dashboard');openTouristMode()}else{initLiveAdmin();await go('dashboard')}}
+window.addEventListener('beforeunload',()=>{if(watchId!==null)navigator.geolocation?.clearWatch(watchId)});init();
+</script>
+</body>
+</html>
